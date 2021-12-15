@@ -1,0 +1,75 @@
+defmodule <%= app_name %>.Schema do
+  use Absinthe.Schema
+
+  alias <%= app_name %>.Types
+  alias <%= app_name %>.Schema.{Mutations, Queries}
+
+  # Types<%= for type_module <- types do %>
+    import_types Types.<%= type_module %><% end %>
+
+  # Queries<%= for query <- queries do %>
+    import_types Queries.<%= Macro.camelize(query) %><% end %>
+
+  <%= if Enum.any?(mutations) do %>
+  # Mutations<%= for mutation <- mutations do %>
+      import_types Mutations.<%= Macro.camelize(mutation) %><% end %><% end %>
+
+  query do
+    <%= for query <- queries do %>
+      import_fields :<%= query %>_queries<% end %>
+  end
+
+  <%= if Enum.any?(mutations) do %>
+    mutations do
+      <%= for mutation <- mutations do %>
+        import_fields :<%= mutation %>_mutations<% end %>
+    end
+  <% end %>
+
+  <%= if Enum.any?(subscriptions) do %>
+    subscriptions do
+      <%= for subscription <- subscriptions do %>
+        import_fields :<%= subscription %>_subscriptions<% end %>
+    end
+  <% end %>
+
+  <%= if Enum.any?(data_sources) do %>
+    def context(ctx) do
+      loader = Dataloader.new()
+      <%= for data_source <- data_sources do %>
+        |> Dataloader.add_source(<%= data_source.source %>, <%= data_source.query %>)<% end %>
+    end
+  <% end %>
+
+  <%= if Enum.any?(middleware.query) do %>
+    def middleware(middleware, _, %{identifier: :query}) do
+      [SharedMiddleware.FloodGate.Absinthe, SharedMiddleware.IdToIntegerConverter | middleware] ++
+        [SharedMiddleware.ComplexityRecorder]
+    end<% end %>
+
+  <%= if Enum.any?(middleware.mutation) do %>
+    def middleware(middleware, _, %{identifier: :mutation}) do
+      [SharedMiddleware.FloodGate.Absinthe, SharedMiddleware.IdToIntegerConverter | middleware] ++
+        [SharedMiddleware.ChangesetErrorFormatter]
+    end <% end %>
+
+  <%= if Enum.any?(middleware.subscription) do %>
+  def middleware(middleware, _, %{identifier: :subscription}) do
+    [SharedMiddleware.IdToIntegerConverter | middleware]
+  end<% end %>
+
+  <%= if Enum.any?(middleware.everything) do %>
+    def middleware(middleware, _, _) do
+      [SharedMiddleware.FloodGate.Absinthe, SharedMiddleware.IdToIntegerConverter | middleware] ++
+        [SharedMiddleware.ComplexityRecorder]
+    end
+  <% else %>
+    def middleware(middleware, _, _) do
+      middleware
+    end
+  <% end %>
+
+  def plugins do
+    [Absinthe.Middleware.Dataloader | Absinthe.Plugin.defaults()]
+  end
+end

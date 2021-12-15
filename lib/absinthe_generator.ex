@@ -4,6 +4,11 @@ defmodule AbsintheGenerator do
   @locals_without_parens [
     import_types: 1,
     import_fields: 1,
+    arg: 2,
+    field: 2,
+    middleware: 1,
+    middleware: 2,
+    resolve: 1
   ]
 
   def moduledoc, do: @moduledoc
