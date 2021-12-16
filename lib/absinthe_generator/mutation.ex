@@ -1,12 +1,18 @@
 defmodule AbsintheGenerator.Mutation do
+  @moduledoc """
+  We can utilize this module to generate
+  """
+
   @enforce_keys [:app_name, :mutation_name]
   defstruct @enforce_keys ++ [
+    :moduledoc,
     mutations: []
   ]
 
   @type t :: %AbsintheGenerator.Mutation{
     app_name: String.t,
     mutation_name: String.t,
+    moduledoc: String.t,
     mutations: list(AbsintheGenerator.Schema.Field.t)
   }
 

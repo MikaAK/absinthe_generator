@@ -30,8 +30,10 @@ defmodule AbsintheGenerator.SchemaTest do
     ],
   }
 
-  @expected_output """
+  @expected_output String.replace_suffix("""
   defmodule MyApp.Schema do
+    @moduledoc false
+
     use Absinthe.Schema
 
     alias MyApp.Types
@@ -78,8 +80,7 @@ defmodule AbsintheGenerator.SchemaTest do
       [Absinthe.Middleware.Dataloader | Absinthe.Plugin.defaults()]
     end
   end
-
-  """
+  """, "\n", "")
 
   describe "&run/1" do
     test "generates a fully setup schema file" do

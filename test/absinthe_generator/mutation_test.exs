@@ -51,6 +51,8 @@ defmodule AbsintheGenerator.MutationTest do
 
   @expected_output String.replace_suffix("""
   defmodule MyApp.Schema.Mutations.User do
+    @moduledoc false
+
     use Absinthe.Schema.Notation
 
     alias MyApp.Resolvers

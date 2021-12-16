@@ -1,4 +1,9 @@
 defmodule <%= app_name %>.Schema do
+  <%= if moduledoc do %>
+    @moduledoc "<%= moduledoc %>"
+  <% else %>
+    @moduledoc false
+  <% end %>
   use Absinthe.Schema
 
   alias <%= app_name %>.Types

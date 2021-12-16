@@ -10,6 +10,11 @@ defmodule AbsintheGenerator.Schema.Field do
   defmodule Argument do
     @enforce_keys [:name, :type]
     defstruct @enforce_keys
+
+    @type t :: %AbsintheGenerator.Schema.Field.Argument{
+      name: String.t,
+      type: String.t
+    }
   end
 
   @type t :: %AbsintheGenerator.Schema.Field{

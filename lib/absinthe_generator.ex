@@ -6,9 +6,12 @@ defmodule AbsintheGenerator do
     import_fields: 1,
     arg: 2,
     field: 2,
+    field: 3,
     middleware: 1,
     middleware: 2,
-    resolve: 1
+    resolve: 1,
+    value: 1,
+    value: 2
   ]
 
   def moduledoc, do: @moduledoc
@@ -20,8 +23,9 @@ defmodule AbsintheGenerator do
   end
 
   def ensure_list_of_structs(list, struct, field_name) do
-    if not Enum.all?(list, &is_struct(&1, struct)) do
-      Mix.raise("The list of #{field_name} must be a list of %#{inspect struct}{}")
+    case Enum.find(list, &(not is_struct(&1, struct))) do
+      nil -> :ok
+      non_struct -> Mix.raise("The list of #{field_name} must be a list of %#{inspect struct}{} but instead found:\n#{inspect non_struct}")
     end
   end
 

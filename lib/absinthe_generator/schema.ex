@@ -2,6 +2,7 @@ defmodule AbsintheGenerator.Schema do
   @enforce_keys [:app_name]
   defstruct [
     :app_name,
+    :moduledoc,
     pre_middleware: [],
     post_middleware: [],
     queries: [],

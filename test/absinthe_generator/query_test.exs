@@ -46,6 +46,8 @@ defmodule AbsintheGenerator.QueryTest do
 
   @expected_output String.replace_suffix("""
   defmodule MyApp.Schema.Queries.User do
+    @moduledoc false
+
     use Absinthe.Schema.Notation
 
     alias MyApp.Resolvers
