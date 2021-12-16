@@ -1,4 +1,9 @@
-# AbsintheGenerator
+AbsintheGenerator
+===
+
+[![Test](https://github.com/MikaAK/absinthe_generator/actions/workflows/test-actions.yml/badge.svg)](https://github.com/MikaAK/absinthe_generator/actions/workflows/test-actions.yml)
+[![Hex pm](http://img.shields.io/hexpm/v/absinthe_generator.svg?style=flat)](https://hex.pm/packages/absinthe_generator)
+
 Collection of mix tasks to help generate absinthe
 projects and schemas
 
