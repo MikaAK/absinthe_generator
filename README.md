@@ -31,6 +31,9 @@ mix absinthe              # Lists help for absinthe.gen. commands
 mix absinthe.gen          # Lists help for absinthe.gen. commands
 mix absinthe.gen.mutation # Generates an absinthe mutation schema and inserts the record in the base schema.ex
 mix absinthe.gen.query    # Generates an absinthe query schema and inserts the record in the base schema.ex
+mix absinthe.gen.resolver # Generates an absinthe resolver
+mix absinthe.gen.schema   # Generates an absinthe schema
+mix absinthe.gen.type     # Generates an absinthe type
 ```
 
 ## Using via Code
