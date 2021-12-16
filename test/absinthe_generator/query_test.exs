@@ -8,8 +8,8 @@ defmodule AbsintheGenerator.QueryTest do
       %AbsintheGenerator.Schema.Field{
         description: "Lists the current users",
         name: "me",
-        post_middleware: ["BlitzSharedMiddleware.ChangesetErrorFormatter"],
-        pre_middleware: ["BlitzSharedMiddleware.Auth"],
+        post_middleware: ["SharedMiddleware.ChangesetErrorFormatter"],
+        pre_middleware: ["SharedMiddleware.Auth"],
         resolver_module_function: "&Resolvers.User.me/2",
         return_type: ":user"
       },
@@ -20,13 +20,13 @@ defmodule AbsintheGenerator.QueryTest do
         resolver_module_function: "&Resolvers.User.list_users/2",
         return_type: "list_of(:user)",
         post_middleware: [
-          "BlitzSharedMiddleware.ChangesetErrorFormatter",
-          "BlitzSharedMiddleware.PostProcessor"
+          "SharedMiddleware.ChangesetErrorFormatter",
+          "SharedMiddleware.PostProcessor"
         ],
 
         pre_middleware: [
-          "BlitzSharedMiddleware.PreProcessor",
-          "BlitzSharedMiddleware.Auth, roles: [:ADMIN]"
+          "SharedMiddleware.PreProcessor",
+          "SharedMiddleware.Auth, roles: [:ADMIN]"
         ],
 
         arguments: [
@@ -55,11 +55,11 @@ defmodule AbsintheGenerator.QueryTest do
     object :user_queries do
       @desc "Lists the current users"
       field :me, :user do
-        middleware BlitzSharedMiddleware.Auth
+        middleware SharedMiddleware.Auth
 
         resolve &Resolvers.User.me/2
 
-        middleware BlitzSharedMiddleware.ChangesetErrorFormatter
+        middleware SharedMiddleware.ChangesetErrorFormatter
       end
 
       @desc "Lists all the current users"
@@ -67,13 +67,13 @@ defmodule AbsintheGenerator.QueryTest do
         arg :name, :string
         arg :email, :string
 
-        middleware BlitzSharedMiddleware.PreProcessor
-        middleware BlitzSharedMiddleware.Auth, roles: [:ADMIN]
+        middleware SharedMiddleware.PreProcessor
+        middleware SharedMiddleware.Auth, roles: [:ADMIN]
 
         resolve &Resolvers.User.list_users/2
 
-        middleware BlitzSharedMiddleware.ChangesetErrorFormatter
-        middleware BlitzSharedMiddleware.PostProcessor
+        middleware SharedMiddleware.ChangesetErrorFormatter
+        middleware SharedMiddleware.PostProcessor
       end
     end
   end

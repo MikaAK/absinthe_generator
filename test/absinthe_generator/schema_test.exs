@@ -19,13 +19,13 @@ defmodule AbsintheGenerator.SchemaTest do
 
     data_sources: [
       %AbsintheGenerator.Schema.DataSource{
-        query: "Dataloader.Ecto.new(BlitzPG.Repo.CMS)",
-        source: "BlitzPG.Challenges"
+        query: "Dataloader.Ecto.new(Repo.CMS)",
+        source: "CMS"
       },
 
       %AbsintheGenerator.Schema.DataSource{
-        query: "Dataloader.Ecto.new(BlitzPG.Repo.Auth)",
-        source: "BlitzPG.AuthAccounts"
+        query: "Dataloader.Ecto.new(Repo.Auth)",
+        source: "AuthAccounts"
       }
     ],
   }
@@ -68,8 +68,8 @@ defmodule AbsintheGenerator.SchemaTest do
     def context(ctx) do
       loader =
         Dataloader.new()
-        |> Dataloader.add_source(BlitzPG.Challenges, Dataloader.Ecto.new(BlitzPG.Repo.CMS))
-        |> Dataloader.add_source(BlitzPG.AuthAccounts, Dataloader.Ecto.new(BlitzPG.Repo.Auth))
+        |> Dataloader.add_source(CMS, Dataloader.Ecto.new(Repo.CMS))
+        |> Dataloader.add_source(AuthAccounts, Dataloader.Ecto.new(Repo.Auth))
     end
 
     def middleware(middleware, _, _) do

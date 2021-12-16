@@ -11,4 +11,14 @@ defmodule AbsintheGenerator.Resolver do
     moduledoc: String.t,
     resolver_functions: list(String.t)
   }
+
+  def run(%AbsintheGenerator.Resolver{} = resolver_struct) do
+    assigns = resolver_struct
+      |> Map.from_struct
+      |> Map.to_list
+
+    "absinthe_resolver"
+      |> AbsintheGenerator.template_path
+      |> AbsintheGenerator.evaluate_template(assigns)
+  end
 end

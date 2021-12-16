@@ -8,8 +8,8 @@ defmodule AbsintheGenerator.MutationTest do
       %AbsintheGenerator.Schema.Field{
         description: "Updates the current user",
         name: "update_user",
-        post_middleware: ["BlitzSharedMiddleware.ChangesetErrorFormatter"],
-        pre_middleware: ["BlitzSharedMiddleware.Auth"],
+        post_middleware: ["SharedMiddleware.ChangesetErrorFormatter"],
+        pre_middleware: ["SharedMiddleware.Auth"],
         resolver_module_function: "&Resolvers.User.update_user/2",
         return_type: ":user"
       },
@@ -20,13 +20,13 @@ defmodule AbsintheGenerator.MutationTest do
         resolver_module_function: "&Resolvers.User.update_all_users/2",
         return_type: "list_of(:user)",
         post_middleware: [
-          "BlitzSharedMiddleware.ChangesetErrorFormatter",
-          "BlitzSharedMiddleware.PostProcessor"
+          "SharedMiddleware.ChangesetErrorFormatter",
+          "SharedMiddleware.PostProcessor"
         ],
 
         pre_middleware: [
-          "BlitzSharedMiddleware.PreProcessor",
-          "BlitzSharedMiddleware.Auth, roles: [:ADMIN]"
+          "SharedMiddleware.PreProcessor",
+          "SharedMiddleware.Auth, roles: [:ADMIN]"
         ],
 
         arguments: [
@@ -60,11 +60,11 @@ defmodule AbsintheGenerator.MutationTest do
     object :user_mutations do
       @desc "Updates the current user"
       field :update_user, :user do
-        middleware BlitzSharedMiddleware.Auth
+        middleware SharedMiddleware.Auth
 
         resolve &Resolvers.User.update_user/2
 
-        middleware BlitzSharedMiddleware.ChangesetErrorFormatter
+        middleware SharedMiddleware.ChangesetErrorFormatter
       end
 
       @desc "Updates all users"
@@ -73,13 +73,13 @@ defmodule AbsintheGenerator.MutationTest do
         arg :name, :string
         arg :email, :string
 
-        middleware BlitzSharedMiddleware.PreProcessor
-        middleware BlitzSharedMiddleware.Auth, roles: [:ADMIN]
+        middleware SharedMiddleware.PreProcessor
+        middleware SharedMiddleware.Auth, roles: [:ADMIN]
 
         resolve &Resolvers.User.update_all_users/2
 
-        middleware BlitzSharedMiddleware.ChangesetErrorFormatter
-        middleware BlitzSharedMiddleware.PostProcessor
+        middleware SharedMiddleware.ChangesetErrorFormatter
+        middleware SharedMiddleware.PostProcessor
       end
     end
   end

@@ -1,4 +1,4 @@
-defmodule <%= app_name %>.Resolvers.<%= Macro.camelize(module_name) %> do
+defmodule <%= app_name %>.Resolvers.<%= Macro.camelize(resolver_name) %> do
   <%= if moduledoc do %>
     @moduledoc "<%= moduledoc %>"
   <% else %>
