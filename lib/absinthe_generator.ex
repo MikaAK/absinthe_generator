@@ -19,6 +19,12 @@ defmodule AbsintheGenerator do
     end
   end
 
+  def ensure_list_of_structs(list, struct, field_name) do
+    if not Enum.all?(list, &is_struct(&1, struct)) do
+      Mix.raise("The list of #{field_name} must be a list of %#{inspect struct}{}")
+    end
+  end
+
   def template_path(template_name) do
     Path.join(:code.priv_dir(:absinthe_generator), "templates/#{template_name}.ex.eex")
   end
@@ -26,6 +32,14 @@ defmodule AbsintheGenerator do
   def evaluate_template(template_path, assigns) do
     template_path
       |> EEx.eval_file(assigns)
-      |> Code.format_string!(locals_without_parens: @locals_without_parens)
+      |> attempt_to_format_template
+  end
+
+  defp attempt_to_format_template(code) do
+    Code.format_string!(code, locals_without_parens: @locals_without_parens)
+
+    rescue
+      SyntaxError ->
+        Mix.raise("Error inside the resulting template: \n #{code}")
   end
 end

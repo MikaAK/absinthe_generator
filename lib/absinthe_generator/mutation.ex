@@ -4,30 +4,24 @@ defmodule AbsintheGenerator.Mutation do
     mutations: []
   ]
 
-  defmodule MutationEntry do
-    @enforce_keys [:name, :return_type, :resolver_module_function]
-    defstruct @enforce_keys ++ [
-      :description,
-      arguments: [],
-      middleware: []
-    ]
+  @type t :: %AbsintheGenerator.Mutation{
+    app_name: String.t,
+    mutation_name: String.t,
+    mutations: list(AbsintheGenerator.Schema.Field.t)
+  }
 
-    defmodule Argument do
-      @enforce_keys [:name, :type]
-      defstruct @enforce_keys
-    end
-  end
+  def run(%AbsintheGenerator.Mutation{} = mutation_schema) do
+    AbsintheGenerator.ensure_list_of_structs(
+      mutation_schema.mutations,
+      AbsintheGenerator.Schema.Field,
+      "mutations"
+    )
 
-  def run(%AbsintheGenerator.Mutation{
-    app_name: app_name,
-    mutations: mutations
-  } = mutation_schema) do
-    mutations
-    assigns = schema_struct
+    assigns = mutation_schema
       |> Map.from_struct
       |> Map.to_list
 
-    "absinthe_mutation"
+    "absinthe_schema_mutation"
       |> AbsintheGenerator.template_path
       |> AbsintheGenerator.evaluate_template(assigns)
   end

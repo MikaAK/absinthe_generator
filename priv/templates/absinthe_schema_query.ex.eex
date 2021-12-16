@@ -1,0 +1,24 @@
+defmodule <%= app_name %>.Schema.Queries.<%= Macro.camelize(query_name) %> do
+  use Absinthe.Schema.Notation
+
+  alias <%= app_name %>.Resolvers
+
+  object :<%= query_name %>_queries do
+    <%= for query <- queries do %>
+      @desc "<%= query.description %>"
+      field :<%= query.name %>, <%= query.return_type %> do
+        <%= for argument <- query.arguments do %>
+          arg :<%= argument.name %>, <%= argument.type %><% end %>
+
+
+        <%= for middleware <- query.pre_middleware do %>
+          middleware <%= middleware %><% end %>
+
+        resolve <%= query.resolver_module_function %>
+
+        <%= for middleware <- query.post_middleware do %>
+          middleware <%= middleware %><% end %>
+      end
+    <% end %>
+  end
+end

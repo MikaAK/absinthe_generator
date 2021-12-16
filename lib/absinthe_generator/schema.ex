@@ -38,15 +38,13 @@ defmodule AbsintheGenerator.Schema do
   }
 
   def run(%AbsintheGenerator.Schema{
-    app_name: app_name,
-    types: types,
     data_sources: data_sources,
     pre_middleware: pre_middleware,
     post_middleware: post_middleware,
-    queries: queries,
-    mutations: mutations,
-    subscriptions: subscriptions
   } = schema_struct) do
+    AbsintheGenerator.ensure_list_of_structs(data_sources, AbsintheGenerator.Schema.DataSource, "data sources")
+
+
     assigns = schema_struct
       |> Map.from_struct
       |> Map.put(:middleware, serialize_middleware_assigns(pre_middleware, post_middleware))
@@ -57,8 +55,8 @@ defmodule AbsintheGenerator.Schema do
       |> AbsintheGenerator.evaluate_template(assigns)
   end
 
-  defp serialize_middleware_assigns(pre_middleware, post_middleware) do
-    middleware = %{
+  defp serialize_middleware_assigns(_pre_middleware, _post_middleware) do
+    %{
       everything: [],
       subscription: [],
       mutation: [],

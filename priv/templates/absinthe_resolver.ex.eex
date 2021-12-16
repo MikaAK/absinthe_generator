@@ -1,0 +1,7 @@
+defmodule <%= app_name %>.Resolvers.<%= Macro.camelize(module_name) %> do
+  @moduledoc false
+
+  <%= for resolver_function <- resolver_functions do %>
+      <%= resolver_function %>
+  <% end %>
+end

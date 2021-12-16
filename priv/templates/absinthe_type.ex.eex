@@ -1,0 +1,26 @@
+defmodule <%= app_name %>.Types.<% type_name %> do
+  @moduledoc """
+  GraphQL schema types for TeamOrganization's CoachingTeam
+  """
+  use Absinthe.Schema.Notation
+
+  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
+
+  <%= for enum <- enums do %>
+    enum :<%= enum.name %> do
+      value <%= enum.value %>
+    end
+  <% end %>
+
+  <%= for object <- objects do %>
+    object :<%= object.name %> do
+      <%= for field <- object.fields do %>
+        <% if field.resolver do %>
+          field :<%= field.name %>, :<%= field.type %>, resolve: <%= field.resolver %>
+        <% else %>
+          field :<%= field.name %>, :<%= field.type %>
+        <% end %>
+      <% end %>
+    end
+  <% end %>
+end
