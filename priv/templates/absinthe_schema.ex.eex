@@ -42,31 +42,36 @@ defmodule <%= app_name %>.Schema do
     def context(ctx) do
       loader = Dataloader.new()
       <%= for data_source <- data_sources do %>
-        |> Dataloader.add_source(<%= data_source.source %>, <%= data_source.query %>)<% end %>
+          |> Dataloader.add_source(<%= data_source.source %><%= if data_source.query do %>, <%= data_source.query %><% end %>)<% end %>
     end
   <% end %>
 
-  <%= if Enum.any?(middleware.query) do %>
+  <%= if Enum.any?(middleware.queries) do %>
     def middleware(middleware, _, %{identifier: :query}) do
-      [SharedMiddleware.FloodGate.Absinthe, SharedMiddleware.IdToIntegerConverter | middleware] ++
-        [SharedMiddleware.ComplexityRecorder]
+      <%= if Enum.any?(middleware.queries.pre_middleware) do %> [<%= Enum.join(middleware.queries.pre_middleware, ",") %>] ++ <% end %>
+      middleware
+      <%= if Enum.any?(middleware.queries.post_middleware) do %> ++ [<%= Enum.join(middleware.queries.post_middleware, ",") %>] <% end %>
     end<% end %>
 
-  <%= if Enum.any?(middleware.mutation) do %>
+  <%= if Enum.any?(middleware.mutations) do %>
     def middleware(middleware, _, %{identifier: :mutation}) do
-      [SharedMiddleware.FloodGate.Absinthe, SharedMiddleware.IdToIntegerConverter | middleware] ++
-        [SharedMiddleware.ChangesetErrorFormatter]
+      <%= if Enum.any?(middleware.mutations.pre_middleware) do %> [<%= Enum.join(middleware.mutations.pre_middleware, ",") %>] ++ <% end %>
+      middleware
+      <%= if Enum.any?(middleware.mutations.post_middleware) do %> ++ [<%= Enum.join(middleware.mutations.post_middleware, ",") %>] <% end %>
     end <% end %>
 
-  <%= if Enum.any?(middleware.subscription) do %>
+  <%= if Enum.any?(middleware.subscriptions) do %>
   def middleware(middleware, _, %{identifier: :subscription}) do
-    [SharedMiddleware.IdToIntegerConverter | middleware]
+    <%= if Enum.any?(middleware.subscriptions.pre_middleware) do %> [<%= Enum.join(middleware.subscriptions.pre_middleware, ",") %>] ++ <% end %>
+    middleware
+    <%= if Enum.any?(middleware.subscriptions.post_middleware) do %> ++ [<%= Enum.join(middleware.subscriptions.post_middleware, ",") %>] <% end %>
   end<% end %>
 
-  <%= if Enum.any?(middleware.everything) do %>
+  <%= if Enum.any?(middleware.all) do %>
     def middleware(middleware, _, _) do
-      [SharedMiddleware.FloodGate.Absinthe, SharedMiddleware.IdToIntegerConverter | middleware] ++
-        [SharedMiddleware.ComplexityRecorder]
+    <%= if Enum.any?(middleware.all.pre_middleware) do %> [<%= Enum.join(middleware.all.pre_middleware, ",") %>] ++ <% end %>
+    middleware
+    <%= if Enum.any?(middleware.all.post_middleware) do %> ++ [<%= Enum.join(middleware.all.post_middleware, ",") %>]<% end %>
     end
   <% else %>
     def middleware(middleware, _, _) do

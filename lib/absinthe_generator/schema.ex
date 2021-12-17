@@ -70,8 +70,8 @@ defmodule AbsintheGenerator.Schema do
   ]
 
   defmodule DataSource do
-    @enforce_keys [:source, :query]
-    defstruct @enforce_keys
+    @enforce_keys [:source]
+    defstruct [:query | @enforce_keys]
 
     @type t :: %AbsintheGenerator.Schema.DataSource{
       source: String.t,
@@ -83,9 +83,10 @@ defmodule AbsintheGenerator.Schema do
     @enforce_keys [:module, :types]
     defstruct @enforce_keys
 
+    @type types :: :all | list(:mutation | :query | :subscription)
     @type t :: %AbsintheGenerator.Schema.Middleware{
       module: String.t,
-      types: :all | list(:mutation | :query | :subscription)
+      types: types
     }
   end
 
@@ -123,12 +124,39 @@ defmodule AbsintheGenerator.Schema do
       |> AbsintheGenerator.evaluate_template(assigns)
   end
 
-  defp serialize_middleware_assigns(_pre_middleware, _post_middleware) do
-    %{
-      everything: [],
-      subscription: [],
-      mutation: [],
-      query: []
-    }
+  defp serialize_middleware_assigns(pre_middleware, post_middleware) do
+    pre_middleware = categorize_middleware_into_types(pre_middleware)
+    post_middleware = categorize_middleware_into_types(post_middleware)
+
+    Enum.into(pre_middleware, %{}, fn {pre_middleware_type, pre_middleware_modules} ->
+      {pre_middleware_type, %{
+        pre_middleware: pre_middleware_modules,
+        post_middleware: post_middleware[pre_middleware_type]
+      }}
+    end)
   end
+
+  defp categorize_middleware_into_types(middlewares) do
+    Enum.reduce(
+      middlewares,
+      %{
+        all: [],
+        subscriptions: [],
+        mutations: [],
+        queries: []
+      },
+      fn (%AbsintheGenerator.Schema.Middleware{types: types, module: module}, acc) ->
+        Enum.reduce(types, acc, fn (type, inner_acc) ->
+          type = type |> String.to_atom |> middleware_type_map
+
+          Map.update(inner_acc, type, [module], &(&1 ++ [module]))
+        end)
+      end
+    )
+  end
+
+  defp middleware_type_map(:mutation), do: :mutations
+  defp middleware_type_map(:query), do: :queries
+  defp middleware_type_map(:subscription), do: :subscriptions
+  defp middleware_type_map(:all), do: :all
 end

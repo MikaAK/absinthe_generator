@@ -16,16 +16,10 @@ defmodule AbsintheGenerator do
 
   def moduledoc, do: @moduledoc
 
-  def ensure_not_in_umbrella!(command) do
-    if Mix.Project.umbrella?() do
-      Mix.raise("mix #{command} must be invoked from within your *_web application root directory")
-    end
-  end
-
   def ensure_list_of_structs(list, struct, field_name) do
     case Enum.find(list, &(not is_struct(&1, struct))) do
       nil -> :ok
-      non_struct -> Mix.raise("The list of #{field_name} must be a list of %#{inspect struct}{} but instead found:\n#{inspect non_struct}")
+      non_struct -> raise "The list of #{field_name} must be a list of %#{inspect struct}{} but instead found:\n#{inspect non_struct}"
     end
   end
 
@@ -44,7 +38,7 @@ defmodule AbsintheGenerator do
 
     rescue
       SyntaxError ->
-        Mix.raise("Error inside the resulting template: \n #{code}")
+        reraise "Error inside the resulting template: \n #{code}", __STACKTRACE__
   end
 
   def serialize_struct_to_config(structs) when is_list(structs) do

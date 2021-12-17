@@ -1,6 +1,8 @@
 defmodule Mix.Tasks.Absinthe.Gen.Resolver do
   use Mix.Task
 
+  alias Mix.AbsintheGeneratorUtils
+
   @shortdoc "Generates an absinthe resolver"
 
   @moduledoc """
@@ -8,7 +10,7 @@ defmodule Mix.Tasks.Absinthe.Gen.Resolver do
   """
 
   def run(args) do
-    AbsintheGenerator.ensure_not_in_umbrella!("absinthe.gen.resolver")
+    AbsintheGeneratorUtils.ensure_not_in_umbrella!("absinthe.gen.resolver")
   end
 end
 
