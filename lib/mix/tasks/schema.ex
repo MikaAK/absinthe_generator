@@ -32,14 +32,14 @@ defmodule Mix.Tasks.Absinthe.Gen.Schema do
   ### Example
 
   ```bash
-  mix absinthe.gen.schema pre_middleware:mutation:MyMiddlwareModule post_middleware:all:MyAllMiddleware \
-    --app-name MyApp \
-    --query test \
-    --query user \
-    --mutation user \
-    --mutation session \
-    --type MyApp \
-    --moduledoc "this is the test" \
+  mix absinthe.gen.schema pre_middleware:mutation:MyMiddlwareModule post_middleware:all:MyAllMiddleware
+    --app-name MyApp
+    --query test
+    --query user
+    --mutation user
+    --mutation session
+    --type MyApp
+    --moduledoc "this is the test"
     --data-source "EctoSchemas.Cats"
   ```
   """

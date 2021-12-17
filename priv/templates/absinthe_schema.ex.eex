@@ -17,24 +17,24 @@ defmodule <%= app_name %>.Schema do
 
   <%= if Enum.any?(mutations) do %>
   # Mutations<%= for mutation <- mutations do %>
-      import_types Mutations.<%= Macro.camelize(mutation) %><% end %><% end %>
+    import_types Mutations.<%= Macro.camelize(mutation) %><% end %><% end %>
 
   query do
     <%= for query <- queries do %>
-      import_fields :<%= query %>_queries<% end %>
+      import_fields :<%= Macro.underscore(query) %>_queries<% end %>
   end
 
   <%= if Enum.any?(mutations) do %>
     mutations do
       <%= for mutation <- mutations do %>
-        import_fields :<%= mutation %>_mutations<% end %>
+        import_fields :<%= Macro.underscore(mutation) %>_mutations<% end %>
     end
   <% end %>
 
   <%= if Enum.any?(subscriptions) do %>
     subscriptions do
       <%= for subscription <- subscriptions do %>
-        import_fields :<%= subscription %>_subscriptions<% end %>
+        import_fields :<%= Macro.underscore(subscription) %>_subscriptions<% end %>
     end
   <% end %>
 
@@ -42,7 +42,7 @@ defmodule <%= app_name %>.Schema do
     def context(ctx) do
       loader = Dataloader.new()
       <%= for data_source <- data_sources do %>
-          |> Dataloader.add_source(<%= data_source.source %><%= if data_source.query do %>, <%= data_source.query %><% end %>)<% end %>
+          |> Dataloader.add_source(<%= Macro.camelize(data_source.source) %><%= if data_source.query do %>, <%= data_source.query %><% end %>)<% end %>
     end
   <% end %>
 
