@@ -39,7 +39,16 @@ mix absinthe.gen.type     # Generates an absinthe type
 ## Using via Code
 This library also enables developers to create configs that pass into each portion
 and those configs can be utilized to generate absinthe portions. To see more on this
-please checkout the [hexdocs](https://hex.pm/packages/absinthe_generator)
+please checkout the docs for:
+
+- `AbsintheGenerator.Schema`
+- `AbsintheGenerator.Mutation`
+- `AbsintheGenerator.Query`
+- `AbsintheGenerator.Resolver`
+- `AbsintheGenerator.Type`
+
+Each of these modules defines a struct, when passed to the `&AbsintheGenerator.Schema.run/1` function
+this will generate a string template for your file
 
 
 ### Contributing
