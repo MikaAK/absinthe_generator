@@ -1,4 +1,6 @@
 defmodule Mix.AbsintheGeneratorUtils do
+  @moduledoc false
+
   def parse_path_opts(args, switches \\ []) do
     {opts, extra_args, _} = OptionParser.parse(args,
       switches: Keyword.merge([path: :string], switches)
