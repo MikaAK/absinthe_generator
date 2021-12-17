@@ -66,7 +66,7 @@ defmodule AbsintheGenerator.MixProject do
 
         "Types": [
           AbsintheGenerator.Type,
-          AbsintheGenerator.Type.Enum,
+          AbsintheGenerator.Type.EnumValue,
           AbsintheGenerator.Type.Object,
           AbsintheGenerator.Type.Object.Field
         ]

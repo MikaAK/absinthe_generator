@@ -1,4 +1,6 @@
 defmodule AbsintheGenerator.Definitions do
+  @moduledoc false
+
   def app_name, do: [
     type: :string,
     required: true,
