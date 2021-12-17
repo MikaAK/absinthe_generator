@@ -1,6 +1,22 @@
 defmodule AbsintheGenerator.Mutation do
+  alias AbsintheGenerator.Definitions
+
+  @definition [
+    app_name: Definitions.app_name(),
+    mutation_name: Definitions.query_namespace(),
+    moduledoc: Definitions.moduledoc(),
+    mutations: [
+      type: {:list, :keyword_list},
+      doc: "List of %`AbsintheGenerator.Schema.Field`{}"
+    ]
+  ]
+
   @moduledoc """
-  We can utilize this module to generate
+  We can utilize this module to generate mutation files to be imported
+  into the `schema.ex`
+
+  ### Definitions
+  #{NimbleOptions.docs(@definition)}
   """
 
   @enforce_keys [:app_name, :mutation_name]
@@ -16,14 +32,18 @@ defmodule AbsintheGenerator.Mutation do
     mutations: list(AbsintheGenerator.Schema.Field.t)
   }
 
-  def run(%AbsintheGenerator.Mutation{} = mutation_schema) do
+  def run(%AbsintheGenerator.Mutation{} = mutation_struct) do
     AbsintheGenerator.ensure_list_of_structs(
-      mutation_schema.mutations,
+      mutation_struct.mutations,
       AbsintheGenerator.Schema.Field,
       "mutations"
     )
 
-    assigns = mutation_schema
+    mutation_struct
+      |> AbsintheGenerator.serialize_struct_to_config
+      |> NimbleOptions.validate!(@definition)
+
+    assigns = mutation_struct
       |> Map.from_struct
       |> Map.to_list
 

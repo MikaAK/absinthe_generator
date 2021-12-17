@@ -1,4 +1,61 @@
 defmodule AbsintheGenerator.Schema do
+  alias AbsintheGenerator.Definitions
+
+  @definition [
+    app_name: Definitions.app_name(),
+    moduledoc: Definitions.moduledoc(),
+
+    queries: [
+      type: {:list, :string},
+      default: [],
+      doc: "List of query namespaces"
+    ],
+
+    mutations: [
+      type: {:list, :string},
+      default: [],
+      doc: "List of mutation namespaces"
+    ],
+
+    subscriptions: [
+      type: {:list, :string},
+      default: [],
+      doc: "List of subscription namespaces"
+    ],
+
+    types: [
+      type: {:list, :string},
+      default: [],
+      doc: "List of types"
+    ],
+
+    data_sources: [
+      type: {:list, :keyword_list},
+      default: [],
+      doc: "List of %`AbsintheGenerator.Schema.DataSource`{}"
+    ],
+
+    pre_middleware: [
+      type: {:list, :keyword_list},
+      default: [],
+      doc: "List of %`AbsintheGenerator.Schema.Middleware`{}"
+    ],
+
+    post_middleware: [
+      type: {:list, :keyword_list},
+      default: [],
+      doc: "List of %`AbsintheGenerator.Schema.Middleware`{}"
+    ]
+  ]
+
+  @moduledoc """
+  We can utilize this module to generate resolver files which
+  are then used in the mutations/queries/subscriptions
+
+  ### Definitions
+  #{NimbleOptions.docs(@definition)}
+  """
+
   @enforce_keys [:app_name]
   defstruct [
     :app_name,
@@ -16,7 +73,7 @@ defmodule AbsintheGenerator.Schema do
     @enforce_keys [:source, :query]
     defstruct @enforce_keys
 
-    @type t :: %DataSource{
+    @type t :: %AbsintheGenerator.Schema.DataSource{
       source: String.t,
       query: String.t
     }
@@ -25,6 +82,11 @@ defmodule AbsintheGenerator.Schema do
   defmodule Middleware do
     @enforce_keys [:module, :types]
     defstruct @enforce_keys
+
+    @type t :: %AbsintheGenerator.Schema.Middleware{
+      module: String.t,
+      types: :all | list(:mutation | :query | :subscription)
+    }
   end
 
   @type t :: %__MODULE__{
@@ -44,7 +106,12 @@ defmodule AbsintheGenerator.Schema do
     post_middleware: post_middleware,
   } = schema_struct) do
     AbsintheGenerator.ensure_list_of_structs(data_sources, AbsintheGenerator.Schema.DataSource, "data sources")
+    AbsintheGenerator.ensure_list_of_structs(pre_middleware, AbsintheGenerator.Schema.Middleware, "pre middleware")
+    AbsintheGenerator.ensure_list_of_structs(post_middleware, AbsintheGenerator.Schema.Middleware, "post middleware")
 
+    schema_struct
+      |> AbsintheGenerator.serialize_struct_to_config
+      |> NimbleOptions.validate!(@definition)
 
     assigns = schema_struct
       |> Map.from_struct

@@ -8,13 +8,27 @@ defmodule AbsintheGenerator.SchemaTest do
     subscriptions: ["user"],
     types: ["User", "Summoner"],
     post_middleware: [
-      "SharedMiddleware.ChangesetErrorFormatter",
-      "SharedMiddleware.AuthorizationMiddleware"
+      %AbsintheGenerator.Schema.Middleware{
+        types: [:mutation, :query],
+        module: "SharedMiddleware.ChangesetErrorFormatter"
+      },
+
+      %AbsintheGenerator.Schema.Middleware{
+        types: :all,
+        module: "SharedMiddleware.AuthorizationMiddleware"
+      },
     ],
 
     pre_middleware: [
-      "SharedMiddleware.IDIntegerConverter",
-      "SharedMiddleware.ChampionIDValidator"
+      %AbsintheGenerator.Schema.Middleware{
+        types: [:subscription],
+        module: "SharedMiddleware.ChampionIDValidator"
+      },
+
+      %AbsintheGenerator.Schema.Middleware{
+        types: :all,
+        module: "SharedMiddleware.IDIntegerConverter"
+      }
     ],
 
     data_sources: [

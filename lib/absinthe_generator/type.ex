@@ -1,4 +1,29 @@
 defmodule AbsintheGenerator.Type do
+  alias AbsintheGenerator.Definitions
+
+  @definition [
+    app_name: Definitions.app_name(),
+    type_name: [type: :string, required: true, doc: "name of the type"],
+    moduledoc: Definitions.moduledoc(),
+    enums: [
+      type: {:list, :keyword_list},
+      doc: "List of %`AbsintheGenerator.Type.EnumValue`{}"
+    ],
+
+    objects: [
+      type: {:list, :keyword_list},
+      doc: "List of %`AbsintheGenerator.Type.Object`{}"
+    ]
+  ]
+
+  @moduledoc """
+  We can utilize this module to generate resolver files which
+  are then used in the mutations/queries/subscriptions
+
+  ### Definitions
+  #{NimbleOptions.docs(@definition)}
+  """
+
   @enforce_keys [:app_name, :type_name]
   defstruct @enforce_keys ++ [
     :moduledoc,
@@ -52,6 +77,10 @@ defmodule AbsintheGenerator.Type do
       objects,
       &(AbsintheGenerator.ensure_list_of_structs(&1.fields, AbsintheGenerator.Type.Object.Field, "fields"))
     )
+
+    type_struct
+      |> AbsintheGenerator.serialize_struct_to_config
+      |> NimbleOptions.validate!(@definition)
 
     assigns = type_struct
       |> Map.from_struct
