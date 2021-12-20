@@ -86,8 +86,25 @@ defmodule AbsintheGenerator.SchemaTest do
         |> Dataloader.add_source(AuthAccounts, Dataloader.Ecto.new(Repo.Auth))
     end
 
+    def middleware(middleware, _, %{identifier: :query}) do
+      middleware ++
+        [SharedMiddleware.ChangesetErrorFormatter]
+    end
+
+    def middleware(middleware, _, %{identifier: :mutation}) do
+      middleware ++
+        [SharedMiddleware.ChangesetErrorFormatter]
+    end
+
+    def middleware(middleware, _, %{identifier: :subscription}) do
+      [SharedMiddleware.ChampionIDValidator] ++
+        middleware
+    end
+
     def middleware(middleware, _, _) do
-      middleware
+      [SharedMiddleware.IDIntegerConverter] ++
+        middleware ++
+        [SharedMiddleware.AuthorizationMiddleware]
     end
 
     def plugins do

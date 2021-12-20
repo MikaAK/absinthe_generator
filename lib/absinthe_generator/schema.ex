@@ -145,12 +145,16 @@ defmodule AbsintheGenerator.Schema do
         mutations: [],
         queries: []
       },
-      fn (%AbsintheGenerator.Schema.Middleware{types: types, module: module}, acc) ->
-        Enum.reduce(types, acc, fn (type, inner_acc) ->
-          type = type |> String.to_atom |> middleware_type_map
+      fn
+        (%AbsintheGenerator.Schema.Middleware{types: :all, module: module}, acc) ->
+          Map.update(acc, :all, [module], &(&1 ++ [module]))
 
-          Map.update(inner_acc, type, [module], &(&1 ++ [module]))
-        end)
+        (%AbsintheGenerator.Schema.Middleware{types: types, module: module}, acc) ->
+          Enum.reduce(types, acc, fn (type, inner_acc) ->
+            type = type |> to_string |> String.to_atom |> middleware_type_map
+
+            Map.update(inner_acc, type, [module], &(&1 ++ [module]))
+          end)
       end
     )
   end

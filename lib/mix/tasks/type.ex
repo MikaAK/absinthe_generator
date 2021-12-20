@@ -13,5 +13,3 @@ defmodule Mix.Tasks.Absinthe.Gen.Type do
     AbsintheGeneratorUtils.ensure_not_in_umbrella!("absinthe.gen.type")
   end
 end
-
-
