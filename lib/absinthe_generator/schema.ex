@@ -56,6 +56,8 @@ defmodule AbsintheGenerator.Schema do
   #{NimbleOptions.docs(@definition)}
   """
 
+  def definitions, do: @definition
+
   @enforce_keys [:app_name]
   defstruct [
     :app_name,

@@ -24,6 +24,8 @@ defmodule AbsintheGenerator.Type do
   #{NimbleOptions.docs(@definition)}
   """
 
+  def definitions, do: @definition
+
   @enforce_keys [:app_name, :type_name]
   defstruct @enforce_keys ++ [
     :moduledoc,

@@ -10,13 +10,7 @@ defmodule Mix.Tasks.Absinthe.Gen.Schema do
 
   ### Options
 
-  - `app_name` - Application name (required)
-  - `moduledoc` - module doc to inject
-  - `type` - Type modules to utilize (multiple possible)
-  - `query` - Query modules to utilize (multiple possible)
-  - `mutation` - Mutation modules to utilize (multiple possible)
-  - `subscription` - Subscription modules to utilize (multiple possible)
-  - `data_source` - List of PG contects to utilize (multiple possible)
+  #{NimbleOptions.docs(AbsintheGenerator.Schema.definitions())}
 
   ### Specifying Middleware
   To specify middleware we can utilize the following syntax
@@ -50,6 +44,7 @@ defmodule Mix.Tasks.Absinthe.Gen.Schema do
     AbsintheGeneratorUtils.ensure_not_in_umbrella!("absinthe.gen.schema")
 
     {args, extra_args} = AbsintheGeneratorUtils.parse_path_opts(args, [
+      path: :string,
       app_name: :string,
       moduledoc: :string,
 
@@ -93,7 +88,6 @@ defmodule Mix.Tasks.Absinthe.Gen.Schema do
         pre_middleware:query:MyMiddlewareModule
         pre_middleware:all:MyMiddlewareModule
       """)
-
     end
   end
 
