@@ -1,4 +1,4 @@
-defmodule <%= app_name %>.Schema.Mutations.<%= Macro.camelize(mutation_name) %> do
+defmodule <%= Macro.camelize(app_name) %>.Schema.Mutations.<%= Macro.camelize(mutation_name) %> do
   <%= if moduledoc do %>
     @moduledoc "<%= moduledoc %>"
   <% else %>
@@ -6,22 +6,22 @@ defmodule <%= app_name %>.Schema.Mutations.<%= Macro.camelize(mutation_name) %> 
   <% end %>
   use Absinthe.Schema.Notation
 
-  alias <%= app_name %>.Resolvers
+  alias <%= Macro.camelize(app_name) %>.Resolvers
 
-  object :<%= mutation_name %>_mutations do
+  object :<%= Macro.underscore(mutation_name) %>_mutations do
     <%= for mutation <- mutations do %>
       @desc "<%= mutation.description %>"
-      field :<%= mutation.name %>, <%= mutation.return_type %> do
+      field :<%= Macro.underscore(mutation.name) %>, <%= mutation.return_type %> do
         <%= for argument <- mutation.arguments do %>
-          arg :<%= argument.name %>, <%= argument.type %><% end %>
+          arg :<%= Macro.underscore(argument.name) %>, <%= argument.type %><% end %>
 
         <%= for middleware <- mutation.pre_middleware do %>
-          middleware <%= middleware %><% end %>
+          middleware <%= Macro.camelize(middleware) %><% end %>
 
         resolve <%= mutation.resolver_module_function %>
 
         <%= for middleware <- mutation.post_middleware do %>
-          middleware <%= middleware %><% end %>
+          middleware <%= Macro.camelize(middleware) %><% end %>
       end
     <% end %>
   end

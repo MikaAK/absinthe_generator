@@ -19,6 +19,8 @@ defmodule AbsintheGenerator.Query do
   #{NimbleOptions.docs(@definition)}
   """
 
+  def definitions, do: @definition
+
   @enforce_keys [:app_name, :query_name]
   defstruct @enforce_keys ++ [
     :moduledoc,

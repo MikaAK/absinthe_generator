@@ -1,4 +1,4 @@
-defmodule <%= app_name %>.Schema do
+defmodule <%= Macro.camelize(app_name) %>.Schema do
   <%= if moduledoc do %>
     @moduledoc "<%= moduledoc %>"
   <% else %>
@@ -6,11 +6,11 @@ defmodule <%= app_name %>.Schema do
   <% end %>
   use Absinthe.Schema
 
-  alias <%= app_name %>.Types
-  alias <%= app_name %>.Schema.{Mutations, Queries}
+  alias <%= Macro.camelize(app_name) %>.Types
+  alias <%= Macro.camelize(app_name) %>.Schema.{Mutations, Queries}
 
   # Types<%= for type_module <- types do %>
-    import_types Types.<%= type_module %><% end %>
+    import_types Types.<%= Macro.camelize(type_module) %><% end %>
 
   # Queries<%= for query <- queries do %>
     import_types Queries.<%= Macro.camelize(query) %><% end %>

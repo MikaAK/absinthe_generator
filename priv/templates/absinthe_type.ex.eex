@@ -1,4 +1,4 @@
-defmodule <%= app_name %>.Types.<%= Macro.camelize(type_name) %> do
+defmodule <%= Macro.camelize(app_name) %>.Types.<%= Macro.camelize(type_name) %> do
   <%= if moduledoc do %>
     @moduledoc "<%= moduledoc %>"
   <% else %>
@@ -9,17 +9,17 @@ defmodule <%= app_name %>.Types.<%= Macro.camelize(type_name) %> do
   import Absinthe.Resolution.Helpers, only: [dataloader: 1]
 
   <%= for enum <- enums do %>
-    enum :<%= enum.name %> do
+    enum :<%= Macro.underscore(enum.name) %> do
       <%= for value <- enum.values do %>
-        value :<%= value %> <% end %>
+        value :<%= Macro.underscore(value) %> <% end %>
     end
   <% end %>
 
   <%= for object <- objects do %>
-    object :<%= object.name %> do
+    object :<%= Macro.underscore(object.name) %> do
       <%= for field <- object.fields do %>
-          <%= if field.resolver do %> field :<%= field.name %>, <%= field.type %>, resolve: <%= field.resolver %>
-            <% else %> field :<%= field.name %>, <%= field.type %><% end %><% end %>
+          <%= if field.resolver do %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %>, resolve: <%= field.resolver %>
+            <% else %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %><% end %><% end %>
     end
   <% end %>
 end

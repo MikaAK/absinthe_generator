@@ -20,6 +20,8 @@ defmodule AbsintheGenerator.Resolver do
   #{NimbleOptions.docs(@definition)}
   """
 
+  def definitions, do: @definition
+
   @enforce_keys [:app_name, :resolver_name]
   defstruct @enforce_keys ++ [
     :moduledoc,
