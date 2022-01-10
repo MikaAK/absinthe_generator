@@ -35,7 +35,7 @@ defmodule Mix.Tasks.Absinthe.Gen.Query do
   alias Mix.AbsintheGeneratorUtils
   alias Mix.AbsintheGeneratorUtils.SchemaFieldParser
 
-  @query_regex ~r/^$/
+  @query_regex ~r/^([a-z]+|list_of\([^\(\)]+\))+[A-Za-z\.]+(:middleware:[A-Za-z]+)?+$/
 
   def run(args) do
     AbsintheGeneratorUtils.ensure_not_in_umbrella!("absinthe.gen.query")

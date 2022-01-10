@@ -17,7 +17,6 @@ defmodule Mix.Tasks.Absinthe.Gen.Mutation do
       moduledoc: :string
     ])
 
-
     AbsintheGeneratorUtils.write_template("./test.ex", "Hello")
   end
 end

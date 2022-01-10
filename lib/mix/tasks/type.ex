@@ -17,7 +17,7 @@ defmodule Mix.Tasks.Absinthe.Gen.Type do
 
   ```bash
   type_name:enum:VALUE_1:VALUE_2:VALUE_3
-  type_name:object:name:string:birthday:date
+  type_name:object:name:string:birthday:date:names:list_of(string)
   ```
 
 

@@ -11,12 +11,12 @@ defmodule <%= Macro.camelize(app_name) %>.Types.<%= Macro.camelize(type_name) %>
   <%= for enum <- enums do %>
     enum :<%= Macro.underscore(enum.name) %> do
       <%= for value <- enum.values do %>
-        value :<%= Macro.underscore(value) %> <% end %>
+        value :<%= value %> <% end %>
     end
   <% end %>
 
   <%= for object <- objects do %>
-    object :<%= Macro.underscore(object.name) %> do
+    object :<%= object.name %> do
       <%= for field <- object.fields do %>
           <%= if field.resolver do %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %>, resolve: <%= field.resolver %>
             <% else %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %><% end %><% end %>

@@ -25,6 +25,7 @@ defmodule AbsintheGenerator.MixProject do
   defp deps do
     [
       {:nimble_options, "~> 0.4"},
+      {:inflex, "~> 2.0.0"},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
   end
@@ -34,7 +35,7 @@ defmodule AbsintheGenerator.MixProject do
       maintainers: ["Mika Kalathil"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/MikaAK/absinthe_generator"},
-      files: ~w(mix.exs README.md CHANGELOG.md LICENSE lib)
+      files: ~w(mix.exs README.md CHANGELOG.md LICENSE lib priv)
     ]
   end
 

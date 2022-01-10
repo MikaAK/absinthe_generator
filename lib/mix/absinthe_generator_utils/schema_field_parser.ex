@@ -1,10 +1,12 @@
 defmodule Mix.AbsintheGeneratorUtils.SchemaFieldParser do
+  @arg_type_regex ~r/^(:[a-z_]+)|(non_null|list_of)\(.*\)$/
+
   def parse_fields(fields) do
     Enum.map(fields, &parse_field/1)
   end
 
   def parse_field(field) do
-    case String.split(field, ":") do
+    case String.split(field, ~r/[^(:]+:[^(:]/) do
       [field_name, return_type | field_or_resolver_or_middleware] ->
         {
           resolver_module_function,
@@ -39,12 +41,29 @@ defmodule Mix.AbsintheGeneratorUtils.SchemaFieldParser do
         ([arg_name, arg_type], {pre_middleware, args, post_middleware}) ->
           argument = %AbsintheGenerator.Schema.Field.Argument{
             name: arg_name,
-            type: arg_type
+            type: ensure_arg_is_proper_format(arg_name, arg_type)
           }
 
           {pre_middleware, args ++ [argument], post_middleware}
       end)
 
     {resolver_function, args, pre_middleware, post_middleware}
+  end
+
+  defp ensure_arg_is_proper_format(arg_name, arg_type) do
+    if not (arg_type =~ @arg_type_regex) do
+      Mix.raise("""
+      Arg #{arg_name} doesn't match the proper format for arguments. Please make sure it matches the following Regex:
+
+        #{inspect @arg_type_regex}
+
+      ### Examples
+
+        :user
+        :string
+        list_of(:string)
+        non_null(list_of(non_null(:string)))
+      """)
+    end
   end
 end
