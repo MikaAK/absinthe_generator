@@ -20,6 +20,8 @@ defmodule AbsintheGenerator.Resolver do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator.FileWriter
+
   def definitions, do: @definition
 
   @enforce_keys [:app_name, :resolver_name]
@@ -34,6 +36,12 @@ defmodule AbsintheGenerator.Resolver do
     moduledoc: String.t,
     resolver_functions: list(String.t)
   }
+
+  @impl AbsintheGenerator.FileWriter
+  def file_path(%AbsintheGenerator.Resolver{
+    app_name: app_name,
+    resolver_name: resolver_name,
+  }), do: "./lib/#{Macro.underscore(app_name)}/resolvers/#{Macro.underscore(resolver_name)}.ex"
 
   def run(%AbsintheGenerator.Resolver{} = resolver_struct) do
     assigns = resolver_struct

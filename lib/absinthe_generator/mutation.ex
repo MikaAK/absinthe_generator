@@ -19,6 +19,8 @@ defmodule AbsintheGenerator.Mutation do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator.FileWriter
+
   @enforce_keys [:app_name, :mutation_name]
   defstruct @enforce_keys ++ [
     :moduledoc,
@@ -31,6 +33,12 @@ defmodule AbsintheGenerator.Mutation do
     moduledoc: String.t,
     mutations: list(AbsintheGenerator.Schema.Field.t)
   }
+
+  @impl AbsintheGenerator.FileWriter
+  def file_path(%AbsintheGenerator.Mutation{
+    app_name: app_name,
+    mutation_name: mutation_name,
+  }), do: "./lib/#{Macro.underscore(app_name)}/schema/mutations/#{Macro.underscore(mutation_name)}.ex"
 
   def run(%AbsintheGenerator.Mutation{} = mutation_struct) do
     AbsintheGenerator.ensure_list_of_structs(

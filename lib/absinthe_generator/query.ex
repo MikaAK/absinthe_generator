@@ -19,6 +19,8 @@ defmodule AbsintheGenerator.Query do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator.FileWriter
+
   def definitions, do: @definition
 
   @enforce_keys [:app_name, :query_name]
@@ -33,6 +35,12 @@ defmodule AbsintheGenerator.Query do
     moduledoc: String.t,
     queries: list(AbsintheGenerator.Schema.Field.t)
   }
+
+  @impl AbsintheGenerator.FileWriter
+  def file_path(%AbsintheGenerator.Query{
+    app_name: app_name,
+    query_name: query_name,
+  }), do: "./lib/#{Macro.underscore(app_name)}/schema/queries/#{Macro.underscore(query_name)}.ex"
 
   def run(%AbsintheGenerator.Query{} = query_struct) do
     AbsintheGenerator.ensure_list_of_structs(

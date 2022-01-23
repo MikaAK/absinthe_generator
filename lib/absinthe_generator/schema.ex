@@ -56,6 +56,8 @@ defmodule AbsintheGenerator.Schema do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator.FileWriter
+
   def definitions, do: @definition
 
   @enforce_keys [:app_name]
@@ -102,6 +104,11 @@ defmodule AbsintheGenerator.Schema do
     types: list(String.t),
     data_sources: list(DataSource.t),
   }
+
+  @impl AbsintheGenerator.FileWriter
+  def file_path(%AbsintheGenerator.Schema{app_name: app_name}) do
+    "./lib/#{Macro.underscore(app_name)}/schema.ex"
+  end
 
   def run(%AbsintheGenerator.Schema{
     data_sources: data_sources,

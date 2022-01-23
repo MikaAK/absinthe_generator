@@ -69,7 +69,7 @@ defmodule AbsintheGenerator.CrudResource do
 
     crud_resource_struct
       |> create_resource_structs(allowed_resources)
-      |> Enum.map(fn %schema{} = schema_data -> {schema, schema.run(schema_data)} end)
+      |> Enum.map(fn %schema{} = schema_data -> {schema_data, schema.run(schema_data)} end)
   end
 
   defp allowed_resources(%AbsintheGenerator.CrudResource{

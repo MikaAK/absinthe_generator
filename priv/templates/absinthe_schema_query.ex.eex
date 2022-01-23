@@ -10,7 +10,7 @@ defmodule <%= Macro.camelize(app_name) %>.Schema.Queries.<%= Macro.camelize(quer
 
   object :<%= Macro.underscore(query_name) %>_queries do
     <%= for query <- queries do %>
-      @desc "<%= query.description %>"
+      <%= if query.description do %>@desc "<%= query.description %>"<% end %>
       field :<%= Macro.underscore(query.name) %>, <%= query.return_type %> do
         <%= for argument <- query.arguments do %>
           arg :<%= Macro.underscore(argument.name) %>, <%= argument.type %><% end %>

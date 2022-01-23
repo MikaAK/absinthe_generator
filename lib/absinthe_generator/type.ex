@@ -24,6 +24,8 @@ defmodule AbsintheGenerator.Type do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator.FileWriter
+
   def definitions, do: @definition
 
   @enforce_keys [:app_name, :type_name]
@@ -67,6 +69,12 @@ defmodule AbsintheGenerator.Type do
     enums: list(AbsintheGenerator.Type.EnumValue.t),
     objects: list(AbsintheGenerator.Type.Object.t)
   }
+
+
+  @impl AbsintheGenerator.FileWriter
+  def file_path(%AbsintheGenerator.Type{app_name: app_name, type_name: type_name}) do
+    "./lib/#{Macro.underscore(app_name)}/types/#{Macro.underscore(type_name)}.ex"
+  end
 
   def run(%AbsintheGenerator.Type{
     enums: enums,
