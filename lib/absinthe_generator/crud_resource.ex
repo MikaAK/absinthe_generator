@@ -35,6 +35,8 @@ defmodule AbsintheGenerator.CrudResource do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator
+
   @enforce_keys [:app_name, :resource_name, :context_module]
   defstruct @enforce_keys ++ [
     :moduledoc,
@@ -48,7 +50,7 @@ defmodule AbsintheGenerator.CrudResource do
     app_name: String.t,
     resource_name: String.t,
     moduledoc: String.t,
-    resource_fields: list(String.t),
+    resource_fields: list({field_name :: String.t, field_type :: String.t}),
     context_module: module,
     only: list(crud_type),
     except: list(crud_type)
@@ -56,6 +58,7 @@ defmodule AbsintheGenerator.CrudResource do
 
   @resource_crud_types [:create, :find, :index, :update, :delete]
 
+  @impl AbsintheGenerator
   def run(%AbsintheGenerator.CrudResource{} = crud_resource_struct) do
     if Enum.any?(crud_resource_struct.only) and Enum.any?(crud_resource_struct.except) do
       throw "Must only suply only or except but not both to CrudResource"
@@ -99,7 +102,7 @@ defmodule AbsintheGenerator.CrudResource do
       %AbsintheGenerator.Resolver{
         app_name: app_name,
         resolver_name: upper_camelize(resource_name),
-        resolver_functions: resolver_functions(context_module, allowed_resources)
+        resolver_functions: resolver_functions(resource_fields, context_module, allowed_resources)
       },
 
       %AbsintheGenerator.Mutation{
@@ -129,40 +132,42 @@ defmodule AbsintheGenerator.CrudResource do
     ]
   end
 
-  defp resolver_functions(context_module, allowed_resources) do
+  defp resolver_functions(resource_name, context_module, allowed_resources) do
+    resource_name = Macro.underscore(resource_name)
+
     Enum.map(allowed_resources, fn
       :create ->
         """
         def create(params, _resolution) do
-          #{context_module}.create(params)
+          #{context_module}.create_#{resource_name}(params)
         end
         """
 
       :find ->
         """
         def find(params, _resolution) do
-          #{context_module}.find(params)
+          #{context_module}.find_#{resource_name}(params)
         end
         """
 
       :index ->
         """
         def all(params, _resolution) do
-          #{context_module}.all(params)
+          #{context_module}.all_#{resource_name}(params)
         end
         """
 
       :update ->
         """
         def update(%{id: id} = params, _resolution) do
-          #{context_module}.update(id, params)
+          #{context_module}.update_#{resource_name}(id, params)
         end
         """
 
       :delete ->
         """
         def delete(%{id: id}, _resolution) do
-          #{context_module}.delete(id)
+          #{context_module}.delete_#{resource_name}(id)
         end
         """
     end)

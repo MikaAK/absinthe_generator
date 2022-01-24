@@ -16,19 +16,17 @@ defmodule Mix.AbsintheGeneratorUtils do
   end
 
   def write_template(contents, file_path) do
-    if not File.exists?(file_path) or confirm_file_overwrite(file_path) do
-      file_path
-        |> Path.dirname
-        |> File.mkdir_p!
+    if Mix.Generator.overwrite?(file_path, contents) do
+      directory = Path.dirname(file_path)
 
-      File.write!(file_path, contents)
+      if not File.dir?(directory) do
+        Mix.Generator.create_directory(directory)
+      end
+
+      Mix.Generator.create_file(file_path, contents)
     else
       Mix.raise("Aborted writing template to #{file_path}")
     end
-  end
-
-  defp confirm_file_overwrite(file_path) do
-    Mix.shell().yes?("Existing file found, confirm you would like to override #{file_path}")
   end
 
   def collect_arguments(args, fields) do

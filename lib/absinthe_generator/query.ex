@@ -19,6 +19,7 @@ defmodule AbsintheGenerator.Query do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator
   @behaviour AbsintheGenerator.FileWriter
 
   def definitions, do: @definition
@@ -42,6 +43,7 @@ defmodule AbsintheGenerator.Query do
     query_name: query_name,
   }), do: "./lib/#{Macro.underscore(app_name)}/schema/queries/#{Macro.underscore(query_name)}.ex"
 
+  @impl AbsintheGenerator
   def run(%AbsintheGenerator.Query{} = query_struct) do
     AbsintheGenerator.ensure_list_of_structs(
       query_struct.queries,

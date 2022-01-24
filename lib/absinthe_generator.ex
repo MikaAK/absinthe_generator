@@ -1,4 +1,7 @@
 defmodule AbsintheGenerator do
+  @doc "This callback is for each resource to create it's own struct"
+  @callback run(resource_struct :: struct) :: any
+
   @moduledoc File.read!("./README.md")
 
   @locals_without_parens [
@@ -15,6 +18,8 @@ defmodule AbsintheGenerator do
   ]
 
   def moduledoc, do: @moduledoc
+
+  def run(%resource_struct{} = struct_data), do: resource_struct.run(struct_data)
 
   def ensure_list_of_structs(list, struct, field_name) do
     case Enum.find(list, &(not is_struct(&1, struct))) do

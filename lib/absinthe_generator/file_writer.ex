@@ -12,9 +12,8 @@ defmodule AbsintheGenerator.FileWriter do
   end
 
   defp force_write_file(path, contents) do
-    File.mkdir_p!(Path.dirname(path))
-
-    File.write!(path, contents)
+    Mix.Generator.create_directory(Path.dirname(path))
+    Mix.Generator.create_file(path, contents)
   end
 
   def inject_contents_to_existing_file(path, contents) do

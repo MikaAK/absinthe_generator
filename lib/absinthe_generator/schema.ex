@@ -56,6 +56,7 @@ defmodule AbsintheGenerator.Schema do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator
   @behaviour AbsintheGenerator.FileWriter
 
   def definitions, do: @definition
@@ -110,6 +111,7 @@ defmodule AbsintheGenerator.Schema do
     "./lib/#{Macro.underscore(app_name)}/schema.ex"
   end
 
+  @impl AbsintheGenerator
   def run(%AbsintheGenerator.Schema{
     data_sources: data_sources,
     pre_middleware: pre_middleware,

@@ -20,6 +20,7 @@ defmodule AbsintheGenerator.Resolver do
   #{NimbleOptions.docs(@definition)}
   """
 
+  @behaviour AbsintheGenerator
   @behaviour AbsintheGenerator.FileWriter
 
   def definitions, do: @definition
@@ -43,6 +44,7 @@ defmodule AbsintheGenerator.Resolver do
     resolver_name: resolver_name,
   }), do: "./lib/#{Macro.underscore(app_name)}/resolvers/#{Macro.underscore(resolver_name)}.ex"
 
+  @impl AbsintheGenerator
   def run(%AbsintheGenerator.Resolver{} = resolver_struct) do
     assigns = resolver_struct
       |> Map.from_struct
