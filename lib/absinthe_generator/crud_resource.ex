@@ -92,7 +92,7 @@ defmodule AbsintheGenerator.CrudResource do
     resource_name: resource_name,
     resource_fields: resource_fields
   }, allowed_resources) do
-    schema_items = [
+    [
       %AbsintheGenerator.Type{
         app_name: app_name,
         type_name: resource_name,
@@ -102,7 +102,7 @@ defmodule AbsintheGenerator.CrudResource do
       %AbsintheGenerator.Resolver{
         app_name: app_name,
         resolver_name: upper_camelize(resource_name),
-        resolver_functions: resolver_functions(resource_fields, context_module, allowed_resources)
+        resolver_functions: resolver_functions(resource_name, context_module, allowed_resources)
       },
 
       %AbsintheGenerator.Mutation{
@@ -117,8 +117,6 @@ defmodule AbsintheGenerator.CrudResource do
         queries: resource_queries(resource_name, allowed_resources, resource_fields)
       }
     ]
-
-    schema_items ++ [AbsintheGenerator.SchemaBuilder.generate(app_name, schema_items)]
   end
 
   defp type_objects(resource_name, resource_fields) do
@@ -217,7 +215,7 @@ defmodule AbsintheGenerator.CrudResource do
     Enum.reduce(allowed_resources, [], fn
       :find, acc ->
         acc ++ [%AbsintheGenerator.Schema.Field{
-          name: "find_#{resource_name}",
+          name: "#{resource_name}",
           return_type: ":#{resource_name}",
           resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.find/2",
           arguments: Enum.map(resource_fields, fn {field_name, field_type} ->
@@ -230,7 +228,7 @@ defmodule AbsintheGenerator.CrudResource do
 
       :all, acc ->
         acc ++ [%AbsintheGenerator.Schema.Field{
-          name: "all_#{Inflex.pluralize(resource_name)}",
+          name: "#{Inflex.pluralize(resource_name)}",
           return_type: "list_of(non_null(:#{resource_name}))",
           resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.all/2",
           arguments: Enum.map(resource_fields, fn {field_name, field_type} ->
