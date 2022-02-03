@@ -45,7 +45,7 @@ defmodule AbsintheGenerator.CrudResource do
     except: []
   ]
 
-  @type crud_type :: :create | :find | :index | :update | :delete
+  @type crud_type :: :create | :find | :all | :index | :update | :delete
   @type t :: %AbsintheGenerator.CrudResource{
     app_name: String.t,
     resource_name: String.t,
@@ -56,7 +56,7 @@ defmodule AbsintheGenerator.CrudResource do
     except: list(crud_type)
   }
 
-  @resource_crud_types [:create, :find, :index, :update, :delete]
+  @resource_crud_types [:create, :find, :all, :index, :update, :delete]
 
   @impl AbsintheGenerator
   def run(%AbsintheGenerator.CrudResource{} = crud_resource_struct) do
