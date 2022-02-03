@@ -12,7 +12,6 @@ defmodule AbsintheGenerator.FileWriter do
   end
 
   defp force_write_file(path, contents) do
-    Mix.Generator.create_directory(Path.dirname(path))
     Mix.Generator.create_file(path, contents)
   end
 

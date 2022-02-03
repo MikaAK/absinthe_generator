@@ -6,7 +6,9 @@ defmodule <%= Macro.camelize(app_name) %>.Types.<%= Macro.camelize(type_name) %>
   <% end %>
   use Absinthe.Schema.Notation
 
-  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
+  <%= if dataloader_used? do %>
+    import Absinthe.Resolution.Helpers, only: [dataloader: 1]
+  <% end %>
 
   <%= for enum <- enums do %>
     enum :<%= Macro.underscore(enum.name) %> do

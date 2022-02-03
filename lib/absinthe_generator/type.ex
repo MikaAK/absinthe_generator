@@ -96,10 +96,19 @@ defmodule AbsintheGenerator.Type do
 
     assigns = type_struct
       |> Map.from_struct
+      |> maybe_add_dataloader_import
       |> Map.to_list
 
     "absinthe_type"
       |> AbsintheGenerator.template_path
       |> AbsintheGenerator.evaluate_template(assigns)
+  end
+
+  defp maybe_add_dataloader_import(%{objects: objects} = type_arguments) do
+    dataloader_used? = Enum.any?(objects, fn object ->
+      Enum.any?(object.fields, &(&1.resolver))
+    end)
+
+    Map.put(type_arguments, :dataloader_used?, dataloader_used?)
   end
 end

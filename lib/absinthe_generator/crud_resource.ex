@@ -92,11 +92,12 @@ defmodule AbsintheGenerator.CrudResource do
     resource_name: resource_name,
     resource_fields: resource_fields
   }, allowed_resources) do
+    resource_fields_for_non_types = remove_resolver_fields(resource_fields)
     [
       %AbsintheGenerator.Type{
         app_name: app_name,
         type_name: resource_name,
-        objects: type_objects(resource_name, resource_fields)
+        objects: [type_object(resource_name, resource_fields)]
       },
 
       %AbsintheGenerator.Resolver{
@@ -108,26 +109,28 @@ defmodule AbsintheGenerator.CrudResource do
       %AbsintheGenerator.Mutation{
         app_name: app_name,
         mutation_name: upper_camelize(resource_name),
-        mutations: resource_mutations(resource_name, allowed_resources, resource_fields)
+        mutations: resource_mutations(resource_name, allowed_resources, resource_fields_for_non_types)
       },
 
       %AbsintheGenerator.Query{
         app_name: app_name,
         query_name: upper_camelize(resource_name),
-        queries: resource_queries(resource_name, allowed_resources, resource_fields)
+        queries: resource_queries(resource_name, allowed_resources, resource_fields_for_non_types)
       }
     ]
   end
 
-  defp type_objects(resource_name, resource_fields) do
-    [
-      %AbsintheGenerator.Type.Object{
-        name: resource_name,
-        fields: Enum.map(resource_fields, fn {field_name, field_type} ->
+  def type_object(resource_name, resource_fields) do
+    %AbsintheGenerator.Type.Object{
+      name: resource_name,
+      fields: Enum.map(resource_fields, fn
+        {field_name, field_type} ->
           %AbsintheGenerator.Type.Object.Field{name: field_name, type: field_type}
-        end)
-      }
-    ]
+
+        {field_name, field_type, resolver} ->
+          %AbsintheGenerator.Type.Object.Field{name: field_name, type: field_type, resolver: resolver}
+      end)
+    }
   end
 
   defp resolver_functions(resource_name, context_module, allowed_resources) do
@@ -208,6 +211,13 @@ defmodule AbsintheGenerator.CrudResource do
         }]
 
       _, acc -> acc
+    end)
+  end
+
+  defp remove_resolver_fields(resource_fields) do
+    Enum.map(resource_fields, fn
+      {_, _} = resource -> resource
+      {field_name, field_type, _resolver} -> {field_name, field_type}
     end)
   end
 
