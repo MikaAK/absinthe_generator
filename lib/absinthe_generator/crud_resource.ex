@@ -19,11 +19,17 @@ defmodule AbsintheGenerator.CrudResource do
     ],
 
     only: [
-      type: {:list, {:or, [:create, :find, :index, :update, :delete]}}
+      type: {:list, {:or, [
+        :create,
+        :find,
+        :index,
+        :update,
+        :delete
+      ]}}
     ],
 
     except: [
-      type: {:list, {:or, [:create, :find, :index, :update, :delete]}}
+      type: {:list, {:or, [:create, :find, :index, :update, :delete, :find_and_update_or_create]}}
     ]
   ]
 
@@ -45,7 +51,7 @@ defmodule AbsintheGenerator.CrudResource do
     except: []
   ]
 
-  @type crud_type :: :create | :find | :all | :index | :update | :delete
+  @type crud_type :: :create | :find | :index | :update | :delete | :find_and_update_or_create
   @type t :: %AbsintheGenerator.CrudResource{
     app_name: String.t,
     resource_name: String.t,
@@ -56,7 +62,7 @@ defmodule AbsintheGenerator.CrudResource do
     except: list(crud_type)
   }
 
-  @resource_crud_types [:create, :find, :all, :index, :update, :delete]
+  @resource_crud_types [:create, :find, :index, :update, :delete, :find_and_update_or_create]
 
   @impl AbsintheGenerator
   def run(%AbsintheGenerator.CrudResource{} = crud_resource_struct) do
@@ -171,22 +177,37 @@ defmodule AbsintheGenerator.CrudResource do
           #{context_module}.delete_#{resource_name}(id)
         end
         """
+
+      :find_and_update_or_create ->
+        """
+        def find_and_update_or_create(%{id: id} = params, _resolution) do
+          #{context_module}.find_and_update_or_create_#{resource_name}(id, Map.delete(params, :id))
+        end
+        """
     end)
   end
 
   defp resource_mutations(resource_name, allowed_resources, resource_fields) do
+    non_null_id_argument = %AbsintheGenerator.Schema.Field.Argument{name: "id", type: "non_null(:id)"}
+
     Enum.reduce(allowed_resources, [], fn
       :update, acc ->
         acc ++ [%AbsintheGenerator.Schema.Field{
           name: "update_#{resource_name}",
           return_type: ":#{resource_name}",
           resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.update/2",
-          arguments: Enum.map(resource_fields, fn {field_name, field_type} ->
-            %AbsintheGenerator.Schema.Field.Argument{
-              name: field_name,
-              type: field_type
-            }
-          end)
+          arguments: resource_fields
+            |> filter_id_arguments
+            |> filter_relational_types
+            |> filter_timestamp_arguments
+            |> Enum.map(fn {field_name, field_type} ->
+              %AbsintheGenerator.Schema.Field.Argument{
+                name: field_name,
+                type: field_type
+              }
+            end)
+            |> Enum.concat([non_null_id_argument])
+            |> Enum.reverse
         }]
 
       :delete, acc ->
@@ -194,7 +215,7 @@ defmodule AbsintheGenerator.CrudResource do
           name: "delete_#{resource_name}",
           return_type: ":#{resource_name}",
           resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.delete/2",
-          arguments: [%AbsintheGenerator.Schema.Field.Argument{name: "id", type: ":id"}]
+          arguments: [non_null_id_argument]
         }]
 
       :create, acc ->
@@ -202,20 +223,48 @@ defmodule AbsintheGenerator.CrudResource do
           name: "create_#{resource_name}",
           return_type: ":#{resource_name}",
           resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.create/2",
-          arguments: Enum.map(resource_fields, fn {field_name, field_type} ->
-            %AbsintheGenerator.Schema.Field.Argument{
-              name: field_name,
-              type: field_type
-            }
-          end)
+          arguments: resource_fields
+            |> filter_id_name_arguments
+            |> filter_relational_types
+            |> filter_timestamp_arguments
+            |> Enum.map(fn {field_name, field_type} ->
+              %AbsintheGenerator.Schema.Field.Argument{
+                name: field_name,
+                type: field_type
+              }
+            end)
+          }]
+
+      :find_and_update_or_create, acc ->
+        acc ++ [%AbsintheGenerator.Schema.Field{
+          name: "find_and_update_or_create_#{resource_name}",
+          return_type: ":#{resource_name}",
+          resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.find_and_update_or_create/2",
+          arguments: resource_fields
+            |> filter_id_arguments
+            |> filter_relational_types
+            |> filter_timestamp_arguments
+            |> Enum.map(fn {field_name, field_type} ->
+              %AbsintheGenerator.Schema.Field.Argument{
+                name: field_name,
+                type: field_type
+              }
+            end)
+            |> Enum.concat([non_null_id_argument])
         }]
 
       _, acc -> acc
     end)
   end
 
+  defp filter_id_arguments(resource_fields) do
+    Stream.reject(resource_fields, fn {_, field_type} ->
+      field_type === ":id"
+    end)
+  end
+
   defp remove_resolver_fields(resource_fields) do
-    Enum.map(resource_fields, fn
+    Stream.map(resource_fields, fn
       {_, _} = resource -> resource
       {field_name, field_type, _resolver} -> {field_name, field_type}
     end)
@@ -228,28 +277,59 @@ defmodule AbsintheGenerator.CrudResource do
           name: "#{resource_name}",
           return_type: ":#{resource_name}",
           resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.find/2",
-          arguments: Enum.map(resource_fields, fn {field_name, field_type} ->
-            %AbsintheGenerator.Schema.Field.Argument{
-              name: field_name,
-              type: field_type
-            }
-          end)
+          arguments: resource_fields
+            |> filter_relational_types
+            |> filter_datetime_arguments
+            |> Enum.map(fn {field_name, field_type} ->
+              %AbsintheGenerator.Schema.Field.Argument{
+                name: field_name,
+                type: field_type
+              }
+            end)
         }]
 
-      :all, acc ->
+      :index, acc ->
         acc ++ [%AbsintheGenerator.Schema.Field{
           name: "#{Inflex.pluralize(resource_name)}",
           return_type: "list_of(non_null(:#{resource_name}))",
           resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.all/2",
-          arguments: Enum.map(resource_fields, fn {field_name, field_type} ->
-            %AbsintheGenerator.Schema.Field.Argument{
-              name: field_name,
-              type: field_type
-            }
-          end)
+          arguments: resource_fields
+            |> filter_relational_types
+            |> filter_datetime_arguments
+            |> filter_id_name_arguments
+            |> Enum.map(fn {field_name, field_type} ->
+              %AbsintheGenerator.Schema.Field.Argument{
+                name: field_name,
+                type: field_type
+              }
+            end)
         }]
 
       _, acc -> acc
+    end)
+  end
+
+  defp filter_relational_types(resource_fields) do
+    Stream.reject(resource_fields, fn {field_name, field_type} ->
+      Inflex.singularize(field_type) =~ Inflex.singularize(field_name)
+    end)
+  end
+
+  defp filter_datetime_arguments(resource_fields) do
+    Stream.reject(resource_fields, fn {_, field_type} ->
+      field_type === ":datetime"
+    end)
+  end
+
+  defp filter_id_name_arguments(resource_fields) do
+    Stream.reject(resource_fields, fn {field_name, _} ->
+      field_name === "id"
+    end)
+  end
+
+  defp filter_timestamp_arguments(resource_fields) do
+    Stream.reject(resource_fields, fn {field_name, _} ->
+      field_name in ["inserted_at", "updated_at"]
     end)
   end
 

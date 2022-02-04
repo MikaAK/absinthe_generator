@@ -46,36 +46,44 @@ defmodule <%= Macro.camelize(app_name) %>.Schema do
     end
   <% end %>
 
-  <%= if Enum.any?(middleware.queries) do %>
+  <% query_pre_middleware? = Enum.any?(middleware.queries.pre_middleware) %>
+  <% query_post_middleware? = Enum.any?(middleware.queries.post_middleware) %>
+
+  <%= if query_pre_middleware? or query_post_middleware? do %>
     def middleware(middleware, _, %{identifier: :query}) do
-      <%= if Enum.any?(middleware.queries.pre_middleware) do %> [<%= Enum.join(middleware.queries.pre_middleware, ",") %>] ++ <% end %>
+      <%= if query_pre_middleware? do %> [<%= Enum.join(middleware.queries.pre_middleware, ",") %>] ++ <% end %>
       middleware
-      <%= if Enum.any?(middleware.queries.post_middleware) do %> ++ [<%= Enum.join(middleware.queries.post_middleware, ",") %>] <% end %>
+      <%= if query_post_middleware? do %> ++ [<%= Enum.join(middleware.queries.post_middleware, ",") %>] <% end %>
     end<% end %>
 
-  <%= if Enum.any?(middleware.mutations) do %>
+  <% mutation_pre_middleware? = Enum.any?(middleware.mutations.pre_middleware) %>
+  <% mutation_post_middleware? = Enum.any?(middleware.mutations.post_middleware) %>
+
+  <%= if mutation_pre_middleware? or mutation_post_middleware? do %>
     def middleware(middleware, _, %{identifier: :mutation}) do
-      <%= if Enum.any?(middleware.mutations.pre_middleware) do %> [<%= Enum.join(middleware.mutations.pre_middleware, ",") %>] ++ <% end %>
+      <%= if mutation_pre_middleware? do %> [<%= Enum.join(middleware.mutations.pre_middleware, ",") %>] ++ <% end %>
       middleware
-      <%= if Enum.any?(middleware.mutations.post_middleware) do %> ++ [<%= Enum.join(middleware.mutations.post_middleware, ",") %>] <% end %>
+      <%= if mutation_post_middleware? do %> ++ [<%= Enum.join(middleware.mutations.post_middleware, ",") %>] <% end %>
     end <% end %>
 
-  <%= if Enum.any?(middleware.subscriptions) do %>
+  <% subscription_pre_middleware? = Enum.any?(middleware.subscriptions.pre_middleware) %>
+  <% subscription_post_middleware? = Enum.any?(middleware.subscriptions.post_middleware) %>
+
+  <%= if subscription_pre_middleware? or subscription_post_middleware? do %>
   def middleware(middleware, _, %{identifier: :subscription}) do
-    <%= if Enum.any?(middleware.subscriptions.pre_middleware) do %> [<%= Enum.join(middleware.subscriptions.pre_middleware, ",") %>] ++ <% end %>
+    <%= if subscription_pre_middleware? do %> [<%= Enum.join(middleware.subscriptions.pre_middleware, ",") %>] ++ <% end %>
     middleware
-    <%= if Enum.any?(middleware.subscriptions.post_middleware) do %> ++ [<%= Enum.join(middleware.subscriptions.post_middleware, ",") %>] <% end %>
+    <%= if subscription_post_middleware? do %> ++ [<%= Enum.join(middleware.subscriptions.post_middleware, ",") %>] <% end %>
   end<% end %>
 
-  <%= if Enum.any?(middleware.all) do %>
+  <% all_pre_middleware? = Enum.any?(middleware.all.pre_middleware) %>
+  <% all_post_middleware? = Enum.any?(middleware.all.post_middleware) %>
+
+  <%= if all_pre_middleware? and all_post_middleware? do %>
     def middleware(middleware, _, _) do
-    <%= if Enum.any?(middleware.all.pre_middleware) do %> [<%= Enum.join(middleware.all.pre_middleware, ",") %>] ++ <% end %>
+    <%= if all_pre_middleware? do %> [<%= Enum.join(middleware.all.pre_middleware, ",") %>] ++ <% end %>
     middleware
-    <%= if Enum.any?(middleware.all.post_middleware) do %> ++ [<%= Enum.join(middleware.all.post_middleware, ",") %>]<% end %>
-    end
-  <% else %>
-    def middleware(middleware, _, _) do
-      middleware
+    <%= if all_post_middleware? do %> ++ [<%= Enum.join(middleware.all.post_middleware, ",") %>]<% end %>
     end
   <% end %>
 
