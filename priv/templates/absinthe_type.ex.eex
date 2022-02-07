@@ -18,7 +18,7 @@ defmodule <%= Macro.camelize(app_name) %>.Types.<%= Macro.camelize(type_name) %>
   <% end %>
 
   <%= for object <- objects do %>
-    object :<%= object.name %> do
+      <%= if object.input? do %>input_<% end %>object :<%= object.name %> do
       <%= for field <- object.fields do %>
           <%= if field.resolver do %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %>, resolve: <%= field.resolver %>
             <% else %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %><% end %><% end %>

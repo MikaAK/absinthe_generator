@@ -45,7 +45,7 @@ defmodule AbsintheGenerator.Type do
 
   defmodule Object do
     @enforce_keys [:name, :fields]
-    defstruct @enforce_keys
+    defstruct [{:input?, false} | @enforce_keys]
 
     defmodule Field do
       @enforce_keys [:name, :type]
