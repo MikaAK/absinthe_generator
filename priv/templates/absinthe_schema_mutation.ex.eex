@@ -13,7 +13,7 @@ defmodule <%= Macro.camelize(app_name) %>.Schema.Mutations.<%= Macro.camelize(mu
       <%= if mutation.description do %>@desc "<%= mutation.description %>"<% end %>
       field :<%= Macro.underscore(mutation.name) %>, <%= mutation.return_type %> do
         <%= for argument <- mutation.arguments do %>
-          arg :<%= Macro.underscore(argument.name) %>, <%= argument.type %><% end %>
+          arg :<%= Macro.underscore(argument.name) %>, <%= AbsintheGenerator.Type.maybe_string_atomize_type(argument.type) %><% end %>
 
         <%= for middleware <- mutation.pre_middleware do %>
           middleware <%= Macro.camelize(middleware) %><% end %>

@@ -10,7 +10,7 @@ defmodule <%= Macro.camelize(app_name) %>.Schema do
   alias <%= Macro.camelize(app_name) %>.Schema.{Mutations, Queries}
 
   # Types<%= for type_module <- types do %>
-    import_types Types.<%= Macro.camelize(type_module) %><% end %>
+    import_types <%= type_module %><% end %>
 
   # Queries<%= for query <- queries do %>
     import_types Queries.<%= Macro.camelize(query) %><% end %>
@@ -25,7 +25,7 @@ defmodule <%= Macro.camelize(app_name) %>.Schema do
   end
 
   <%= if Enum.any?(mutations) do %>
-    mutations do
+    mutation do
       <%= for mutation <- mutations do %>
         import_fields :<%= Macro.underscore(mutation) %>_mutations<% end %>
     end
@@ -43,6 +43,8 @@ defmodule <%= Macro.camelize(app_name) %>.Schema do
       loader = Dataloader.new()
       <%= for data_source <- data_sources do %>
           |> Dataloader.add_source(<%= Macro.camelize(data_source.source) %><%= if data_source.query do %>, <%= data_source.query %><% end %>)<% end %>
+
+      Map.put(ctx, :loader, loader)
     end
   <% end %>
 

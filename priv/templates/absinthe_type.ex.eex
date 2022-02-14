@@ -7,7 +7,7 @@ defmodule <%= Macro.camelize(app_name) %>.Types.<%= Macro.camelize(type_name) %>
   use Absinthe.Schema.Notation
 
   <%= if dataloader_used? do %>
-    import Absinthe.Resolution.Helpers, only: [dataloader: 1]
+    import Absinthe.Resolution.Helpers, only: [dataloader: 2]
   <% end %>
 
   <%= for enum <- enums do %>
@@ -20,8 +20,8 @@ defmodule <%= Macro.camelize(app_name) %>.Types.<%= Macro.camelize(type_name) %>
   <%= for object <- objects do %>
       <%= if object.input? do %>input_<% end %>object :<%= object.name %> do
       <%= for field <- object.fields do %>
-          <%= if field.resolver do %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %>, resolve: <%= field.resolver %>
-            <% else %> field :<%= Macro.underscore(field.name) %>, <%= Macro.underscore(field.type) %><% end %><% end %>
+          <%= if field.resolver do %> field :<%= Macro.underscore(field.name) %>, <%= AbsintheGenerator.Type.maybe_string_atomize_type(field.type) %>, resolve: <%= field.resolver %>
+            <% else %> field :<%= Macro.underscore(field.name) %>, <%= AbsintheGenerator.Type.maybe_string_atomize_type(field.type) %><% end %><% end %>
     end
   <% end %>
 end

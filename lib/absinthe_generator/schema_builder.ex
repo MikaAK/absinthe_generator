@@ -10,7 +10,7 @@ defmodule AbsintheGenerator.SchemaBuilder do
 
     %Schema{
       app_name: app_name,
-      types: Enum.map(type_items, &(&1.type_name)),
+      types: Enum.map(type_items, &("Types.#{Macro.camelize(&1.type_name)}")),
       mutations: Enum.map(mutation_items, &(&1.mutation_name)),
       queries: Enum.map(query_items, &(&1.query_name)),
       data_sources: extract_data_sources(type_items)

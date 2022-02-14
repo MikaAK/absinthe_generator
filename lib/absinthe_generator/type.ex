@@ -104,6 +104,14 @@ defmodule AbsintheGenerator.Type do
       |> AbsintheGenerator.evaluate_template(assigns)
   end
 
+  def maybe_string_atomize_type(field_type) do
+    if field_type =~ ~r/[\(\):]/ do
+      field_type
+    else
+      ":#{field_type}"
+    end
+  end
+
   defp maybe_add_dataloader_import(%{objects: objects} = type_arguments) do
     dataloader_used? = Enum.any?(objects, fn object ->
       Enum.any?(object.fields, &(&1.resolver))
