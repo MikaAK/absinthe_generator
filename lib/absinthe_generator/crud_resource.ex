@@ -66,6 +66,10 @@ defmodule AbsintheGenerator.CrudResource do
   @query_crud_types [:find, :index ]
   @resource_crud_types @mutation_crud_types ++ @query_crud_types
 
+  def mutation_crud_types, do: @mutation_crud_types
+  def query_crud_types, do: @query_crud_types
+  def resource_crud_types, do: @resource_crud_types
+
   @impl AbsintheGenerator
   def run(%AbsintheGenerator.CrudResource{} = crud_resource_struct) do
     if Enum.any?(crud_resource_struct.only) and Enum.any?(crud_resource_struct.except) do
@@ -120,7 +124,7 @@ defmodule AbsintheGenerator.CrudResource do
       [%AbsintheGenerator.Mutation{
         app_name: app_name,
         mutation_name: upper_camelize(resource_name),
-        mutations: resource_mutations(resource_name, allowed_resources, resource_fields_for_non_types)
+        mutations: resource_mutations(resource_name, allowed_resources)
       } | schema_types]
     else
       schema_types
@@ -157,6 +161,8 @@ defmodule AbsintheGenerator.CrudResource do
     %AbsintheGenerator.Type.Object{
       name: resource_name,
       fields: Enum.map(resource_fields, fn
+        %AbsintheGenerator.Type.Object.Field{} = field -> field
+
         {field_name, field_type} ->
           %AbsintheGenerator.Type.Object.Field{name: field_name, type: field_type}
 
@@ -196,7 +202,7 @@ defmodule AbsintheGenerator.CrudResource do
       :index ->
         """
         def all(params, _resolution) do
-          #{context_module}.all_#{resource_name}(params)
+          {:ok, #{context_module}.all_#{Inflex.pluralize(to_string(resource_name))}(params)}
         end
         """
 
@@ -217,13 +223,13 @@ defmodule AbsintheGenerator.CrudResource do
       :find_and_update_or_create ->
         """
         def find_and_update_or_create(%{id: id} = params, _resolution) do
-          #{context_module}.find_and_update_or_create_#{resource_name}(id, Map.delete(params, :id))
+          #{context_module}.find_and_update_or_create_#{resource_name}(%{id: id}, Map.delete(params, :id))
         end
         """
     end)
   end
 
-  defp resource_mutations(resource_name, allowed_resources, resource_fields) do
+  defp resource_mutations(resource_name, allowed_resources) do
     non_null_id_argument = %AbsintheGenerator.Schema.Field.Argument{name: "id", type: "non_null(:id)"}
     input_type_argument = %AbsintheGenerator.Schema.Field.Argument{name: resource_name, type: "non_null(:#{input_type_name(resource_name)})"}
 
@@ -267,12 +273,6 @@ defmodule AbsintheGenerator.CrudResource do
 
   defp input_type_name(resource_name) do
     "#{resource_name}_input"
-  end
-
-  defp filter_id_arguments(resource_fields) do
-    Stream.reject(resource_fields, fn {_, field_type} ->
-      field_type === ":id"
-    end)
   end
 
   defp remove_resolver_fields(resource_fields) do
@@ -324,7 +324,9 @@ defmodule AbsintheGenerator.CrudResource do
   defp filter_relational_types(resource_fields) do
     Stream.reject(resource_fields, fn
       {"id", _} -> false
-      {field_name, field_type} -> Inflex.singularize(field_type) =~ Inflex.singularize(field_name)
+      {field_name, field_type} ->
+        # This doesn't work, because of that this should be re-written into phoenix_config
+        Inflex.singularize(field_type) =~ Inflex.singularize(field_name)
     end)
   end
 

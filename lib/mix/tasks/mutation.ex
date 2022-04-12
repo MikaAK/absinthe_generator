@@ -12,7 +12,7 @@ defmodule Mix.Tasks.Absinthe.Gen.Mutation do
   def run(args) do
     AbsintheGeneratorUtils.ensure_not_in_umbrella!("absinthe.gen.mutation")
 
-    {opts, extra_args} = AbsintheGeneratorUtils.parse_path_opts(args, [
+    {_opts, _extra_args} = AbsintheGeneratorUtils.parse_path_opts(args, [
       mutation_name: :string,
       moduledoc: :string
     ])

@@ -104,6 +104,14 @@ defmodule AbsintheGenerator.Type do
       |> AbsintheGenerator.evaluate_template(assigns)
   end
 
+  def maybe_add_non_null(%AbsintheGenerator.Type.Object.Field{type: type} = type_struct) do
+    if type =~ ~r/^non_null/ do
+      type_struct
+    else
+      %{type_struct | type: "non_null(#{maybe_string_atomize_type(type)})"}
+    end
+  end
+
   def maybe_string_atomize_type(field_type) do
     if field_type =~ ~r/[\(\):]/ do
       field_type

@@ -26,4 +26,12 @@ defmodule AbsintheGenerator.Schema.Field do
     pre_middleware: list(String.t),
     post_middleware: list(String.t)
   }
+
+  def maybe_add_non_null_argument(%Argument{type: type} = argument_struct) do
+    if type =~ ~r/^non_null/ do
+      argument_struct
+    else
+      %{argument_struct | type: "non_null(#{AbsintheGenerator.Type.maybe_string_atomize_type(type)})"}
+    end
+  end
 end

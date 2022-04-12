@@ -1,5 +1,5 @@
 defmodule AbsintheGenerator.SchemaBuilder do
-  alias AbsintheGenerator.{Type, Resolver, Mutation, Query, Schema}
+  alias AbsintheGenerator.{Type, Mutation, Query, Schema}
 
   @dataloader_regex ~r/^dataloader\(([^,]+)/
 
