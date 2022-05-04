@@ -187,7 +187,7 @@ defmodule AbsintheGenerator.CrudResource do
     Enum.map(allowed_resources, fn
       :create ->
         """
-        def create(params, _resolution) do
+        def create(%{#{resource_name}: params}, _resolution) do
           #{context_module}.create_#{resource_name}(params)
         end
         """
@@ -208,7 +208,7 @@ defmodule AbsintheGenerator.CrudResource do
 
       :update ->
         """
-        def update(%{id: id} = params, _resolution) do
+        def update(%{id: id, #{resource_name}: params}, _resolution) do
           #{context_module}.update_#{resource_name}(id, params)
         end
         """
@@ -222,7 +222,7 @@ defmodule AbsintheGenerator.CrudResource do
 
       :find_and_update_or_create ->
         """
-        def find_and_update_or_create(%{id: id} = params, _resolution) do
+        def find_and_update_or_create(%{#{resource_name}: params} = params, _resolution) do
           #{context_module}.find_and_update_or_create_#{resource_name}(%{id: id}, Map.delete(params, :id))
         end
         """

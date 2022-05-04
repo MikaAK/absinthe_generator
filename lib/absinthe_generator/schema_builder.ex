@@ -43,7 +43,7 @@ defmodule AbsintheGenerator.SchemaBuilder do
       source: data_source,
       query: """
         Dataloader.Ecto.new(
-          BlitzPG.Repo.Apex,
+          "<REPO>",
           query: &EctoShorts.CommonFilters.convert_params_to_filter/2
         )
       """
