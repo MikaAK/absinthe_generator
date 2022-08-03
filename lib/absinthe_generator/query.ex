@@ -34,7 +34,7 @@ defmodule AbsintheGenerator.Query do
     app_name: String.t,
     query_name: String.t,
     moduledoc: String.t,
-    queries: list(AbsintheGenerator.Schema.Field.t)
+    queries: list(AbsintheGenerator.TestDescribe.t)
   }
 
   @impl AbsintheGenerator.FileWriter

@@ -1,0 +1,27 @@
+defmodule <%= app_name %>.Schema.Queries.<%= module_name %>Test do
+  use <%= app_name %>.DataCase, async: true
+
+  <%= for describe_block <- tests do %>
+    <%= if describe_block.setup_all do %>
+      setup_all do
+        <%= describe_block.setup %>
+      end
+    <% end %>
+
+    describe "<%= describe_block.describe_name %>" do
+      <%= if describe_block.setup do %>
+        setup do
+          <%= describe_block.setup %>
+        end
+      <% end %>
+
+      <%= for test_item <- describe_block.tests do %>
+        <%= test_item.pre_block %>
+        test "<%= test_item.description %>"<%= AbsintheGenerator.TestDescribe.maybe_build_test_entry_params_list(test_item.params) %> do
+          <%= test_item.function %>
+        end
+      <% end %>
+    end
+  <% end %>
+end
+

@@ -1,8 +1,10 @@
 defmodule <%= Macro.camelize(app_name) %>.Schema.Mutations.<%= Macro.camelize(mutation_name) %> do
   <%= if moduledoc do %>
     @moduledoc "<%= moduledoc %>"
+
   <% else %>
     @moduledoc false
+
   <% end %>
   use Absinthe.Schema.Notation
 

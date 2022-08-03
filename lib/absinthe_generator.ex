@@ -28,8 +28,8 @@ defmodule AbsintheGenerator do
     end
   end
 
-  def template_path(template_name) do
-    Path.join(:code.priv_dir(:absinthe_generator), "templates/#{template_name}.ex.eex")
+  def template_path(template_name, ext \\ "ex") do
+    Path.join(:code.priv_dir(:absinthe_generator), "templates/#{template_name}.#{ext}.eex")
   end
 
   def evaluate_template(template_path, assigns) do

@@ -5,6 +5,7 @@ defmodule AbsintheGenerator.Resolver do
     app_name: Definitions.app_name(),
     resolver_name: [type: :string, required: true, doc: "name of the resolver"],
     moduledoc: Definitions.moduledoc(),
+
     resolver_functions: [
       type: {:list, :string},
       default: [],

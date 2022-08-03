@@ -116,29 +116,60 @@ defmodule AbsintheGenerator.CrudResource do
       %AbsintheGenerator.Resolver{
         app_name: app_name,
         resolver_name: upper_camelize(resource_name),
-        resolver_functions: resolver_functions(resource_name, context_module, allowed_resources)
+        resolver_functions: resolver_functions(resource_name, context_module, allowed_resources),
       }
     ]
 
     schema_types = if mutations_enabled?(allowed_resources) do
-      [%AbsintheGenerator.Mutation{
-        app_name: app_name,
-        mutation_name: upper_camelize(resource_name),
-        mutations: resource_mutations(resource_name, allowed_resources)
-      } | schema_types]
+      app_name
+        |> mutation_objects(resource_name, allowed_resources, context_module)
+        |> Enum.concat(schema_types)
     else
       schema_types
     end
 
     if queries_enabled?(allowed_resources) do
-      [%AbsintheGenerator.Query{
-        app_name: app_name,
-        query_name: upper_camelize(resource_name),
-        queries: resource_queries(resource_name, allowed_resources, resource_fields_for_non_types)
-      } | schema_types]
+      app_name
+        |> query_objects(resource_name, allowed_resources, resource_fields_for_non_types, context_module)
+        |> Enum.concat(schema_types)
     else
       schema_types
     end
+  end
+
+  defp mutation_objects(app_name, resource_name, allowed_resources, context_module) do
+    mutation_name = upper_camelize(resource_name)
+
+    mutation = %AbsintheGenerator.Mutation{
+      app_name: app_name,
+      mutation_name: mutation_name,
+      mutations: resource_mutations(resource_name, allowed_resources)
+    }
+
+    mutation_test = %AbsintheGenerator.MutationTest{
+      app_name: app_name,
+      mutation_name: mutation_name,
+      mutation_tests: resource_mutation_tests(app_name, resource_name, allowed_resources, context_module)
+    }
+
+    [mutation, mutation_test]
+  end
+
+  defp query_objects(app_name, resource_name, allowed_resources, resource_fields_for_non_types, context_module) do
+    query_name = upper_camelize(resource_name)
+    query = %AbsintheGenerator.Query{
+      app_name: app_name,
+      query_name: query_name,
+      queries: resource_queries(resource_name, allowed_resources, resource_fields_for_non_types)
+    }
+
+    query_test = %AbsintheGenerator.QueryTest{
+      app_name: app_name,
+      query_name: query_name,
+      query_tests: resource_query_tests(app_name, resource_name, allowed_resources, context_module)
+    }
+
+    [query, query_test]
   end
 
   defp type_objects(resource_name, resource_fields, allowed_resources) do
@@ -227,6 +258,200 @@ defmodule AbsintheGenerator.CrudResource do
         end
         """
     end)
+  end
+
+  defp resource_query_tests(app_name, resource_name, allowed_resources, context_module) do
+    resource_name_underscored = Macro.underscore(resource_name)
+    resource_name = Macro.camelize(resource_name)
+    non_capitalized_name = non_capitalized(resource_name)
+
+    allowed_resources
+      |> Enum.filter(&(&1 in [:find, :index]))
+      |> Enum.map(fn
+        :find -> %AbsintheGenerator.TestDescribe{
+          describe_name: "@#{resource_name}",
+          setup: """
+            #{resource_name_underscored} = FactoryEx.insert!(#{factory_name(context_module, resource_name)})
+
+            %{#{resource_name_underscored}: #{resource_name_underscored}}
+          """,
+
+          tests: [
+            %AbsintheGenerator.TestDescribe.TestEntry{
+              description: "finds a #{resource_name} by id",
+              params: [resource_name_underscored],
+              pre_block: """
+              @gql_query """
+              query ($id: ID!) {
+                #{non_capitalized_name}(id: $id) {
+                  id
+                }
+              }
+              \"""
+              """,
+              function: """
+              assert {:ok, %{data: data}} = Absinthe.run(@gql_mutation, #{schema_module(app_name)},
+                variables: %{
+                  "id" => #{resource_name_underscored}
+                }
+              )
+
+              assert data["#{non_capitalized_name}"]["id"] === to_string(#{resource_name_underscored}.id)
+              """
+            }
+          ]
+        }
+
+        :index ->
+          pluralized_non_cap_resource_name = Inflex.pluralize(non_capitalized_name)
+          pluralized_resource_name = Inflex.pluralize(non_capitalized_name)
+
+          %AbsintheGenerator.TestDescribe{
+            describe_name: "@#{pluralized_non_cap_resource_name}",
+
+            tests: [
+              %AbsintheGenerator.TestDescribe.TestEntry{
+                description: "finds multiple #{pluralized_resource_name}",
+                pre_block: """
+                @gql_query """
+                query ($ids: ID!) {
+                  #{pluralized_non_cap_resource_name}(ids: $ids) {
+                    id
+                  }
+                }
+                \"""
+                """,
+                function: """
+                #{resource_name_underscored} = #{Enum.random(3..10)} |> FactoryEx.insert_many!(#{factory_name(context_module, resource_name)}) |> Enum.random
+
+                assert {:ok, %{data: data}} = Absinthe.run(@gql_mutation, #{schema_module(app_name)},
+                  variables: %{
+                    "ids" => [#{resource_name_underscored}.id]
+                  }
+                )
+
+                assert hd(data["#{pluralized_non_cap_resource_name}"])["id"] === to_string(#{resource_name_underscored}.id)
+                assert id === to_string(#{resource_name_underscored}.id)
+                """
+              }
+            ]
+          }
+      end)
+  end
+
+  defp resource_mutation_tests(app_name, resource_name, allowed_resources, context_module) do
+    resource_name_underscored = Macro.underscore(resource_name)
+    resource_name = Macro.camelize(resource_name)
+    non_capitalized_name = non_capitalized(resource_name)
+
+    allowed_resources
+      |> Enum.filter(&(&1 in [:create, :delete, :update]))
+      |> Enum.map(fn
+        :create -> %AbsintheGenerator.TestDescribe{
+          describe_name: "@create#{resource_name}",
+
+          tests: [
+            %AbsintheGenerator.TestDescribe.TestEntry{
+              description: "creates a schema with valid params",
+              pre_block: """
+              @gql_query """
+              mutation ($#{non_capitalized_name}: #{resource_name}CreateInput) {
+                create#{resource_name}(#{non_capitalized_name}: $#{non_capitalized_name}) {
+                  id
+                }
+              }
+              \"""
+              """,
+              function: """
+              input_params = FactoryEx.build(#{factory_name(context_module, resource_name)}, [],
+                keys: :string,
+                key_case: :camel
+              )
+
+              assert {:ok, %{data: data}} = Absinthe.run(@gql_mutation, #{schema_module(app_name)},
+                variables: %{
+                  "#{non_capitalized_name}" => input_params
+                }
+              )
+
+              assert %{"create#{resource_name}" => %{"id" => id}}
+              assert id === to_string(#{resource_name_underscored}.id)
+              """
+            }
+          ]
+        }
+
+        :update -> %AbsintheGenerator.TestDescribe{
+          describe_name: "@update#{resource_name}",
+          setup: """
+            #{resource_name_underscored} = FactoryEx.insert!(#{factory_name(context_module, resource_name)})
+
+            %{#{resource_name_underscored}: #{resource_name_underscored}}
+          """,
+
+          tests: [
+            %AbsintheGenerator.TestDescribe.TestEntry{
+              description: "udpates a schema with valid params",
+              params: [resource_name_underscored],
+              pre_block: """
+              @gql_query """
+              mutation ($#{non_capitalized_name}: #{resource_name}UpdateInput) {
+                update#{resource_name}(#{non_capitalized_name}: $#{non_capitalized_name}) {
+                  id
+                }
+              }
+              \"""
+              """,
+              function: """
+              update_params = FactoryEx.build(#{factory_name(context_module, resource_name)}, [], keys: :string, key_case: :camel)
+
+              assert {:ok, %{data: data}} = Absinthe.run(@gql_mutation, #{schema_module(app_name)},
+                variables: %{
+                  "#{non_capitalized_name}" => update_params
+                }
+              )
+
+              assert data["#{non_capitalized_name}"]["id"] === to_string(#{resource_name_underscored}.id)
+
+              actual_value = #{factory_name(context_module, resource_name)}.get(#{resource_name_underscored}.id)
+
+              assert Map.take(actual_value, Map.keys(update_params)) === update_params
+              """
+            }
+          ]
+        }
+
+        :delete -> %AbsintheGenerator.TestDescribe{
+          describe_name: "@delete#{resource_name}",
+
+          tests: [
+            %AbsintheGenerator.TestDescribe.TestEntry{
+              description: "deletes a #{resource_name}",
+              params: [resource_name_underscored],
+              pre_block: """
+              @gql_query """
+              mutation {
+                create#{resource_name}(#{resource_name_underscored}) {
+                  id
+                }
+              }
+              \"""
+              """,
+              function: """
+                assert {:ok, %{data: data}} = Absinthe.run(@gql_mutation, #{schema_module(app_name)})
+              """
+            }
+          ]
+        }
+      end)
+  end
+
+  defp factory_name(context_module, resource_module) do
+    context_parts = context_module |> String.split(".")
+    context_module = List.last(context_parts)
+    context_parts = context_parts |> Enum.take(length(context_parts) - 1) |> Enum.join(".")
+
+    "#{context_parts}.Factory.#{context_module}.#{resource_module}"
   end
 
   defp resource_mutations(resource_name, allowed_resources) do
@@ -348,5 +573,11 @@ defmodule AbsintheGenerator.CrudResource do
     end)
   end
 
-  defp upper_camelize(string), do: string |> String.capitalize |> Macro.camelize
+  defp upper_camelize(<<c::utf8, rest::binary>>), do: Macro.camelize(String.capitalize(<<c>>) <> rest)
+
+  defp non_capitalized(<<c::utf8, rest::binary>>), do: String.downcase(<<c>>) <> rest
+
+  defp schema_module(app_name) do
+    "#{Macro.camelize(app_name)}.Schema"
+  end
 end
