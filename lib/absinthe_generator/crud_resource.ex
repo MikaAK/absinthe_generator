@@ -29,7 +29,7 @@ defmodule AbsintheGenerator.CrudResource do
     ],
 
     except: [
-      type: {:list, {:or, [:create, :find, :index, :update, :delete, :find_and_update_or_create]}}
+      type: {:list, {:or, [:create, :find, :index, :update, :delete, :find_and_upsert]}}
     ]
   ]
 
@@ -51,7 +51,7 @@ defmodule AbsintheGenerator.CrudResource do
     except: []
   ]
 
-  @type crud_type :: :create | :find | :index | :update | :delete | :find_and_update_or_create
+  @type crud_type :: :create | :find | :index | :update | :delete | :find_and_upsert
   @type t :: %AbsintheGenerator.CrudResource{
     app_name: String.t,
     resource_name: String.t,
@@ -62,8 +62,8 @@ defmodule AbsintheGenerator.CrudResource do
     except: list(crud_type)
   }
 
-  @mutation_crud_types [:create, :update, :delete, :find_and_update_or_create]
-  @query_crud_types [:find, :index ]
+  @mutation_crud_types [:create, :update, :delete, :find_and_upsert]
+  @query_crud_types [:find, :index]
   @resource_crud_types @mutation_crud_types ++ @query_crud_types
 
   def mutation_crud_types, do: @mutation_crud_types
@@ -251,10 +251,10 @@ defmodule AbsintheGenerator.CrudResource do
         end
         """
 
-      :find_and_update_or_create ->
+      :find_and_upsert ->
         """
-        def find_and_update_or_create(%{#{resource_name}: params} = params, _resolution) do
-          #{context_module}.find_and_update_or_create_#{resource_name}(%{id: id}, Map.delete(params, :id))
+        def find_and_upsert(%{id: id, #{resource_name}: params} = params, _resolution) do
+          #{context_module}.find_and_upsert_#{resource_name}(%{id: id}, Map.delete(params, :id))
         end
         """
     end)
@@ -484,11 +484,11 @@ defmodule AbsintheGenerator.CrudResource do
           arguments: [input_type_argument]
         }]
 
-      :find_and_update_or_create, acc ->
+      :find_and_upsert, acc ->
         acc ++ [%AbsintheGenerator.Schema.Field{
-          name: "find_and_update_or_create_#{resource_name}",
+          name: "find_and_upsert_#{resource_name}",
           return_type: ":#{resource_name}",
-          resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.find_and_update_or_create/2",
+          resolver_module_function: "&Resolvers.#{upper_camelize(resource_name)}.find_and_upsert/2",
           arguments: [non_null_id_argument, input_type_argument]
         }]
 
