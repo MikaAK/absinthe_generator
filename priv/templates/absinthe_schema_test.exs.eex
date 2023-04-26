@@ -1,4 +1,4 @@
-defmodule <%= app_name %>.Schema.Queries.<%= module_name %>Test do
+defmodule <%= app_name %>.Schema.<%= module_name %>Test do
   use <%= app_name %>.DataCase, async: true
 
   <%= for describe_block <- tests do %>
