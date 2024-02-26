@@ -1,6 +1,7 @@
 defmodule AbsintheGenerator.CrudResource do
   alias AbsintheGenerator.Definitions
 
+  @resource_types [:create, :find, :index, :update, :delete, :find_and_upsert]
   @definition [
     app_name: Definitions.app_name(),
     resource_name: Definitions.query_namespace(),
@@ -19,17 +20,11 @@ defmodule AbsintheGenerator.CrudResource do
     ],
 
     only: [
-      type: {:list, {:or, [
-        :create,
-        :find,
-        :index,
-        :update,
-        :delete
-      ]}}
+      type: {:list, {:or, @resource_types}}
     ],
 
     except: [
-      type: {:list, {:or, [:create, :find, :index, :update, :delete, :find_and_upsert]}}
+      type: {:list, {:or, @resource_types}}
     ]
   ]
 
@@ -257,6 +252,9 @@ defmodule AbsintheGenerator.CrudResource do
           #{context_module}.find_and_upsert_#{resource_name}(%{id: id}, Map.delete(params, :id))
         end
         """
+
+      resource ->
+        throw "Unknown resource #{resource}\nValid resources include: #{inspect @resource_types}"
     end)
   end
 
