@@ -24,7 +24,7 @@ defmodule AbsintheGenerator.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:nimble_options, "~> 0.4"},
+      {:nimble_options, "~> 0.4 or ~> 1.0"},
       {:inflex, "~> 2.0.0"},
       {:ex_doc, ">= 0.0.0", only: :dev}
     ]
